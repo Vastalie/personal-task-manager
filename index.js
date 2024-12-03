@@ -358,7 +358,7 @@ app.get('/tasks/new', requireLogin, (req, res) => {
   });
 
   // Start the server
-  app.listen(8080, '0.0.0.0', () => {
-    console.log('Server running on http://0.0.0.0:8080');
+  app.listen(8000, '0.0.0.0', () => {
+    console.log('Server running on http://0.0.0.0:8000');
 });
 })();

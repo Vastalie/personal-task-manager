@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 node_modules
 .DS_Store
 
+=======
+.env
+node_modules/
+>>>>>>> 7dab70d (Consolidated project files and removed nested folder)

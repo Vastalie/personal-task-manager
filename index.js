@@ -11,7 +11,7 @@ const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 
 const app = express();
-const PORT = 8000;
+const PORT = 8080;
 
 (async () => {
   // Create the database connection

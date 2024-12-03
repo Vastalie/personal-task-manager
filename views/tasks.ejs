@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task List</title>
+</head>
+<body>
+  <h1>Task List</h1>
+
+  <!-- Add Task Form (only visible to logged-in users) -->
+  <% if (user) { %>
+  <form action="/tasks/new" method="POST">
+    <input type="text" name="title" placeholder="Task Title" required>
+    <input type="text" name="description" placeholder="Description" required>
+    <input type="date" name="due_date">
+    <select name="priority">
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select>
+    <button type="submit">Add Task</button>
+  </form>
+  <% } %>
+
+  <!-- Task List -->
+  <ul>
+    <% tasks.forEach(task => { %>
+      <li>
+        <strong><%= task.priority %></strong>: 
+        <% if (user) { %>
+          <!-- Show decrypted description for logged-in users -->
+          <strong>Decrypted:</strong> <%= task.decrypted_description %>
+        <% } else { %>
+          <!-- Show encrypted description for non-logged-in users -->
+          <strong>Encrypted:</strong> <%= task.encrypted_description || 'No encryption' %>
+        <% } %>
+        (Due: <%= task.due_date ? task.due_date.toLocaleDateString() : 'No Due Date' %>) 
+        [<%= task.status %>]
+        <% if (user) { %>
+        <form action="/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
+          <button type="submit">Mark as Completed</button>
+        </form>
+        <form action="/tasks/<%= task.id %>/pending" method="POST" style="display:inline;">
+          <button type="submit">Mark as Pending</button>
+        </form>
+        <form action="/tasks/<%= task.id %>/delete" method="POST" style="display:inline;">
+          <button type="submit">Delete</button>
+        </form>
+        <% } %>
+      </li>
+    <% }); %>
+  </ul>
+
+  <!-- Login or Logout Button -->
+  <% if (user) { %>
+    <a href="/logout">Logout</a>
+  <% } else { %>
+    <form action="/login" method="GET">
+      <button type="submit">Log In to View Decrypted Messages</button>
+    </form>
+  <% } %>
+</body>
+</html>

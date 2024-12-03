@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search To-Do Tasks</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h1>Search To-Do Tasks</h1>
+    <form method="get" action="/search">
+        <input type="text" name="q" placeholder="Enter search term..." value="<%= searchQuery %>">
+        <button type="submit">Search</button>
+    </form>
+    
+    <% if (results.length > 0) { %>
+        <h2>Results for "<%= searchQuery %>":</h2>
+        <ul>
+            <% results.forEach(result => { %>
+                <li>
+                    <strong><%= result.title %></strong>: <%= result.description %> (Completed: <%= result.completed ? 'Yes' : 'No' %>)
+                </li>
+            <% }) %>
+        </ul>
+    <% } else if (searchQuery) { %>
+        <p>No tasks found for "<%= searchQuery %>".</p>
+    <% } else { %>
+        <p>Enter a term to search tasks.</p>
+    <% } %>
+
+    <p><a href="/tasks/new">Add a New Task</a></p>
+    <p><a href="/">Back to Home</a></p>
+</body>
+</html>

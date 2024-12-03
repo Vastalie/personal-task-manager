@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= taskManagerData.appName %> - Home</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="home-container">
+        <%- include('partials/navbar') %> <!-- Include the navbar partial -->
+    <div class="spotify-section">
+        <h1>Welcome To Your <%= taskManagerData.appName %></h1>
+        <p>Manage your tasks with ease and efficiency.</p>
+        <% if (playlist) { %>
+            <iframe 
+                src="https://open.spotify.com/embed/playlist/<%= playlist.id %>" 
+                width="1000" 
+                height="480" 
+                frameborder="0" 
+                allowtransparency="true" 
+                allow="encrypted-media">
+            </iframe>
+        <% } else { %>
+            <p>Unable to fetch Spotify playlist. Please try again later.</p>
+        <% } %>
+        

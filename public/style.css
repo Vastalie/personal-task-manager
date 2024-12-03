@@ -1,0 +1,163 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #672603;
+}
+
+.home-container {
+  text-align: center;
+  padding: 50px;
+}
+
+.home-container nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.home-container nav ul li {
+  margin: 10px 0;
+}
+
+.dashboard-container {
+  padding: 20px;
+  background-color: #1e1e2f;
+  color: white;
+}
+
+.dashboard-container h1 {
+  text-align: center;
+  color: cyan;
+}
+
+.dashboard-metrics {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px;
+}
+
+.metric {
+  background-color: #2c2c3c;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
+  width: 200px;
+}
+
+.charts {
+  background-color: #2c2c3c;
+  margin: 20px auto;
+  width: 90%;
+}
+
+.task {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  list-style-type: none;
+}
+
+/* Green for completed tasks */
+.task.completed {
+  color: white;
+  background-color: green;
+}
+
+/* Grey for pending tasks */
+.task.pending {
+  color: black;
+  background-color: lightgrey;
+}
+
+/* Red for overdue tasks */
+.task.overdue {
+  color: white;
+  background-color: red;
+}
+
+/* Add hover effects for action buttons */
+button {
+  cursor: pointer;
+  border: none;
+  padding: 5px 10px;
+  margin: 0 5px;
+  border-radius: 3px;
+}
+
+/* Light Mode Styles */
+.light-mode {
+  background-color: #ffffff; /* Light background */
+  color: #000000;           /* Dark text globally */
+}
+
+.light-mode .card {
+  background-color: #f5f5f5; /* Light card background */
+  color: #000000;           /* Dark text for cards */
+}
+
+.light-mode canvas {
+  background-color: black; /* Light background for charts */
+}
+
+.light-mode h1, 
+.light-mode h2, 
+.light-mode p, 
+.light-mode .metric, 
+.light-mode .bar-label {
+  color: #000000;           /* Dark text for headings, metrics, and bar labels */
+}
+
+.light-mode .dashboard {
+  color: #55d2f2;           /* Ensure dashboard-wide text is dark */
+}
+
+.light-mode button {
+  background-color: #eeeeee;
+  color: #000000;           /* Dark text for buttons */
+  border: 1px solid #000000;
+}
+
+.light-mode .bar-fill {
+  background-color: #80d0c7; /* Keep bar-fill colour consistent */
+}
+
+/* Navbar Styles */
+.navbar {
+  position: fixed;/* Ensures the navbar stays at the top even when scrolling */
+  top: 0; /* Positions the navbar at the very top */
+  left: 0; /* Aligns the navbar to the left edge */
+  width: 100%; /* Makes the navbar span the full width of the page */
+  z-index: 1000; /* Ensures it stays above other elements */
+  list-style: none; /* Remove default list styling */
+  display: flex; /* Make the list items horizontal */
+  justify-content: center; /* Center the navigation bar */
+  gap: 20px; /* Add spacing between the items */
+  background-color: #350245; /* Background colour for the navbar */
+  padding: 10px 20px; /* Padding for spacing */
+  margin: 0; /* Remove default margin */
+  
+}
+
+/* Style the links in the navbar */
+.navbar li a {
+  text-decoration: none; /* Remove underline from links */
+  color: white; /* Set link text colour */
+  font-size: 16px; /* Font size for the links */
+  padding: 5px 10px; /* Padding around the links */
+  transition: background-color 0.3s; /* Add a hover transition */
+}
+
+/* Add hover effect to navbar links */
+.navbar li a:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  border-radius: 5px; /* Rounded corners for the hover effect */
+}
+.home-container h1 {
+  color: white; /* Sets the heading text colour to white */
+}
+
+.home-container p {
+  color: white; /* Sets the paragraph text colour to white */
+}

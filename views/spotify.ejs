@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify Playlist</title>
+</head>
+<body>
+  <h1>Spotify Playlist</h1>
+
+  <% if (playlist) { %>
+    <h2><%= playlist.name %></h2>
+    <p><%= playlist.description %></p>
+    <ul>
+      <% playlist.tracks.items.forEach(item => { %>
+        <li>
+          <strong><%= item.track.name %></strong> by <%= item.track.artists.map(a => a.name).join(', ') %>
+        </li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p>Unable to fetch playlist data. Please try again later.</p>
+  <% } %>
+</body>
+</html>

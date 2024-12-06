@@ -11,7 +11,6 @@ const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 
 const app = express();
-const PORT = 8080;
 
 (async () => {
   // Create the database connection
@@ -114,7 +113,6 @@ const spotifyApi = new SpotifyWebApi({
     }
 })();
 
-
 app.get('/about', (req, res) => {
   res.render('about');
 });
@@ -166,6 +164,11 @@ app.get('/about', (req, res) => {
     }
   });
   
+  console.log('Fetching tasks from database...');
+  const [tasks] = await db.query('SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks');
+  console.log('Tasks fetched:', tasks);
+  
+
   // Route for viewing all tasks
   app.get('/tasks', async (req, res) => {
     try {
@@ -297,6 +300,18 @@ app.get('/tasks/new', requireLogin, (req, res) => {
     }
   });
 
+// Route to fetch and display registered users
+app.get('/registered-users', async (req, res) => {
+  try {
+      const [results] = await db.query('SELECT username, email, created_at FROM users');
+      res.render('registered-users', { users: results });
+  } catch (err) {
+      console.error('Error fetching users:', err);
+      res.status(500).send('Server error');
+  }
+});
+
+
   // Register Route
   app.get('/register', (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
@@ -358,7 +373,9 @@ app.get('/tasks/new', requireLogin, (req, res) => {
   });
 
   // Start the server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-});
+  const PORT = 8000;
+  // Start the server
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 })();

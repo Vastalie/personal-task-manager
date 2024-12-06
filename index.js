@@ -16,8 +16,8 @@ const app = express();
   // Create the database connection
   const db = await mysql.createConnection({
     host: 'localhost',
-    user: 'admin',
-    password: 'Shaina071199', // Replace with your actual password
+    user: 'appuser',
+    password: 'shaina071199', // Replace with your actual password
     database: 'personal_task_manager',
   });
 

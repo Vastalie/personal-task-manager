@@ -10,6 +10,8 @@ const session = require('express-session');
 const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 const nodemailer = require('nodemailer');
+const { body, validationResult } = require('express-validator');
+
 
 
 const app = express();
@@ -203,9 +205,30 @@ app.get('/about', (req, res) => {
   });
   
 // Route to render the form for adding a new task
-app.get('/tasks/new', requireLogin, (req, res) => {
-  res.render('new-task', { errorMessage: null });
+app.get('/tasks', async (req, res) => {
+  try {
+      // Fetch all tasks from the database
+      const [tasks] = await db.query(
+          'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
+      );
+
+      // Decrypt descriptions and prepare tasks
+      const formattedTasks = tasks.map((task) => ({
+          ...task,
+          decrypted_description: req.session && req.session.user
+              ? decrypt(task.encrypted_description, task.iv) // Decrypt for logged-in users
+              : task.encrypted_description, // Leave encrypted if no session
+          status: task.completed ? 'Completed' : 'Pending',
+      }));
+
+      // Render the tasks page with both title and decrypted description
+      res.render('tasks', { user: req.session.user, tasks: formattedTasks });
+  } catch (err) {
+      console.error('Error loading tasks:', err);
+      res.status(500).send('Internal Server Error');
+  }
 });
+
 
  // Route to handle form submission for adding a new task
  app.post('/tasks/new', requireLogin, async (req, res) => {
@@ -279,28 +302,27 @@ app.get('/tasks/new', requireLogin, (req, res) => {
     const searchQuery = req.query.q || '';
 
     try {
-      let results = [];
-      if (searchQuery) {
-        const query = `
-          SELECT id, title, encrypted_description, iv, due_date, completed, priority
-          FROM tasks
-          WHERE title LIKE ? OR encrypted_description LIKE ?
-          ORDER BY FIELD(priority, "High", "Medium", "Low"), completed, title ASC
-        `;
-        const [tasks] = await db.query(query, [`%${searchQuery}%`, `%${searchQuery}%`]);
+        // Fetch all tasks
+        const [tasks] = await db.query('SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks');
 
-        results = tasks.map(task => ({
-          ...task,
-          description: decrypt(task.encrypted_description, task.iv),
-        }));
-      }
+        // Decrypt and filter tasks by the search query
+        const results = tasks
+            .map(task => ({
+                ...task,
+                decrypted_description: decrypt(task.encrypted_description, task.iv),
+            }))
+            .filter(task =>
+                task.decrypted_description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                task.title.toLowerCase().includes(searchQuery.toLowerCase())
+            );
 
-      res.render('search-results', { results, searchQuery });
+        res.render('search-results', { results, searchQuery });
     } catch (err) {
-      console.error('Error performing search:', err);
-      res.status(500).send('Error performing search');
+        console.error('Error performing search:', err);
+        res.status(500).send('Error performing search');
     }
-  });
+});
+
 
 // Route to fetch and display registered users
 app.get('/registered-users', async (req, res) => {
@@ -377,78 +399,95 @@ app.get('/registered-users', async (req, res) => {
   //Route to Handle Forgotten Password Requests
 //This route generates a reset token and sends a reset email
 
-app.post('/forgot-password', async (req, res) => {
-    const { email } = req.body;
-    try {
-        // Check if user exists
-        const [user] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
-        if (!user) {
-            return res.status(404).json({ message: 'Email not found' });
-        }
-
-        // Generate a reset token
-        const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 3600000); // 1 hour
-
-        // Store token in the database
-        await db.query('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)', [
-            user.id,
-            token,
-            expiresAt,
-        ]);
-
-        // Send email with reset link
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'your-email@gmail.com',
-                pass: 'your-email-password',
-            },
-        });
-
-        const resetUrl = `http://localhost:3000/reset-password/${token}`;
-        await transporter.sendMail({
-            to: email,
-            subject: 'Password Reset',
-            html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link is valid for 1 hour.</p>`,
-        });
-
-        res.json({ message: 'Password reset email sent!' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
+// Route to serve the Forgot Password form
+app.get('/forgot-password', (req, res) => {
+  res.render('forgot-password'); // Ensure you have a 'forgot-password.ejs' or equivalent in your views folder
 });
+
+app.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+      // Generate a reset token and expiry time
+      const token = crypto.randomBytes(32).toString('hex');
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+      const expiresAt = new Date(Date.now() + 3600000); // Token valid for 1 hour
+
+      // Check if user exists
+      const [user] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+
+      if (user) {
+          // Store the token only if the user exists
+          await db.query(
+              'INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)',
+              [user.id, hashedToken, expiresAt]
+          );
+      }
+
+      // Send email regardless of whether the email exists
+      const resetUrl = `http://localhost:8000/reset-password/${token}`;
+      const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+          },
+      });
+
+      await transporter.sendMail({
+          to: email,
+          subject: 'Password Reset Request',
+          html: `<p>If this email is registered, click <a href="${resetUrl}">here</a> to reset your password. This link is valid for 1 hour.</p>`,
+      });
+
+      // Respond with a generic message
+      res.json({ message: 'If the email exists, a reset link has been sent.' });
+  } catch (error) {
+      console.error('Error in forgot-password route:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 
 //Add a Route to Handle Password Reset
 //This route updates the password after successful verification.
+app.post('/reset-password/:token',
+  body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters long')
+      .matches(/[A-Z]/)
+      .withMessage('Password must contain at least one uppercase letter')
+      .matches(/[0-9]/)
+      .withMessage('Password must contain at least one number'),
+  async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+          return res.status(400).json({ errors: errors.array() });
+      }
 
-app.post('/reset-password/:token', async (req, res) => {
-    const { token } = req.params;
-    const { newPassword } = req.body;
+      const { token } = req.params;
+      const { newPassword } = req.body;
 
-    try {
-        // Find the token and check expiry
-        const [reset] = await db.query('SELECT * FROM password_resets WHERE token = ?', [token]);
-        if (!reset || new Date() > new Date(reset.expires_at)) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
-        }
+      try {
+          const hashedReceivedToken = crypto.createHash('sha256').update(token).digest('hex');
+          const [reset] = await db.query('SELECT * FROM password_resets WHERE token = ?', [hashedReceivedToken]);
 
-        // Hash the new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+          if (!reset || new Date() > new Date(reset.expires_at)) {
+              return res.status(400).json({ message: 'Invalid or expired token' });
+          }
 
-        // Update the user's password
-        await db.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, reset.user_id]);
+          const hashedPassword = await bcrypt.hash(newPassword, 10);
+          await db.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, reset.user_id]);
+          await db.query('DELETE FROM password_resets WHERE token = ?', [hashedReceivedToken]);
 
-        // Remove the token from the database
-        await db.query('DELETE FROM password_resets WHERE token = ?', [token]);
+          res.json({ message: 'Password successfully reset!' });
+      } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: 'Internal Server Error' });
+      }
+  }
+);
 
-        res.json({ message: 'Password successfully reset!' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-});
 
   // Start the server
   const PORT = 8000;

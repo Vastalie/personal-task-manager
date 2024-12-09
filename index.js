@@ -251,7 +251,7 @@ app.get('/tasks', async (req, res) => {
     // Insert into the database
     await db.query(
       'INSERT INTO tasks (title, encrypted_description, iv, due_date, completed, priority, user_id) VALUES (?, ?, ?, ?, 0, ?, ?)',
-      [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
+      [title, encryptedData, iv, due_date || null, priority || user_id]
     );
 
     res.redirect('/tasks');

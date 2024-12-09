@@ -3,22 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Task</title>
+    <title>Add a New Task</title>
 </head>
 <body>
     <h1>Add a New Task</h1>
-    <form method="POST" action="/tasks/new">
+    <form action="/tasks/new" method="POST">
         <label for="title">Task Title:</label>
-        <input type="text" id="title" name="title" required><br>
+        <input type="text" id="title" name="title" required>
+        <br><br>
 
         <label for="description">Task Description:</label>
-        <textarea id="description" name="description" required></textarea><br>
+        <textarea id="description" name="description" required></textarea>
+        <br><br>
 
         <label for="due_date">Due Date:</label>
-        <input type="date" id="due_date" name="due_date"><br>
+        <input type="date" id="due_date" name="due_date">
+        <br><br>
+
+        <label for="priority">Priority:</label>
+        <select id="priority" name="priority" required>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </select>
+        <br><br>
 
         <button type="submit">Add Task</button>
     </form>
-    <p><a href="/tasks">Back to View Tasks</a></p>
+
+    <a href="/tasks">Back to View Tasks</a>
 </body>
 </html>

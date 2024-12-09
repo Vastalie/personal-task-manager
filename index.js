@@ -9,7 +9,6 @@ const mysql = require('mysql2/promise');
 const session = require('express-session');
 const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
-const nodemailer = require('nodemailer');
 const { body, validationResult } = require('express-validator');
 
 

@@ -167,11 +167,6 @@ app.get('/about', (req, res) => {
     }
   });
   
-  console.log('Fetching tasks from database...');
-  const [tasks] = await db.query('SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks');
-  console.log('Tasks fetched:', tasks);
-  
-
   // Route for viewing all tasks
   app.get('/tasks', async (req, res) => {
     try {

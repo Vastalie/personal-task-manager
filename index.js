@@ -247,47 +247,43 @@ app.get('/tasks', async (req, res) => {
 
 
  // Route to handle form submission for adding a new task
- app.post('/tasks/new', requireLogin, async (req, res) => {
-  const { title, description, due_date, priority } = req.body;
-  const user_id = req.session.user.id; // Assuming you have user authentication set up
-
-  if (!title || !description) {
-    return res.status(400).send('Task title and description are required.');
-  }
-
-  try {
-    // Encrypt the task description
-    const { encryptedData, iv } = encrypt(description);
-
-    // Ensure encryption was successful
-    if (!encryptedData || !iv) {
-      throw new Error('Encryption failed');
+ app.post(
+  '/tasks/new',
+  requireLogin,
+  [
+    body('title').notEmpty().withMessage('Task title is required'),
+    body('description').notEmpty().withMessage('Task description is required'),
+    body('due_date').optional().isDate().withMessage('Invalid date format'),
+    body('priority')
+      .optional()
+      .isIn(['Low', 'Medium', 'High'])
+      .withMessage('Priority must be Low, Medium, or High'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Insert into the database
-    await db.query(
-      'INSERT INTO tasks (title, encrypted_description, iv, due_date, completed, priority, user_id) VALUES (?, ?, ?, ?, 0, ?, ?)',
-      [title, encryptedData, iv, due_date || null, priority || user_id]
-    );
+    const { title, description, due_date, priority } = req.body;
+    const user_id = req.session.user.id;
 
-    res.redirect('/tasks');
-  } catch (err) {
-    console.error('Error adding task:', err);
-    res.status(500).send('Error adding task');
-  }
-});
-
-  // Mark task as completed
-  app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
     try {
-      const { id } = req.params;
-      await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]);
+      const { encryptedData, iv } = encrypt(description);
+
+      await db.query(
+        'INSERT INTO tasks (title, encrypted_description, iv, due_date, completed, priority, user_id) VALUES (?, ?, ?, ?, 0, ?, ?)',
+        [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
+      );
+
       res.redirect('/tasks');
     } catch (err) {
-      console.error('Error marking task as completed:', err);
-      res.status(500).send('Error marking task as completed');
+      console.error('Error adding task:', err);
+      res.status(500).send('Error adding task');
     }
-  });
+  }
+);
+
 
   // Mark task as pending
   app.post('/tasks/:id/pending', requireLogin, async (req, res) => {
@@ -357,49 +353,74 @@ app.get('/registered-users', async (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
   });
 
-  app.post('/register', async (req, res) => {
-    const { username, password, email } = req.body;
-
-    if (!username || !password || !email) {
-      return res.render('register', { errorMessage: 'All fields are required.', registrationSuccess: false });
+  app.post(
+    '/register',
+    [
+      body('username').notEmpty().withMessage('Username is required'),
+      body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+      body('email').isEmail().withMessage('Invalid email address'),
+    ],
+    async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.render('register', {
+          errorMessage: errors.array().map(err => err.msg).join(', '),
+          registrationSuccess: false,
+        });
+      }
+  
+      const { username, password, email } = req.body;
+  
+      try {
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        await db.query('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [
+          username,
+          hashedPassword,
+          email,
+        ]);
+  
+        res.render('register', { errorMessage: null, registrationSuccess: true });
+      } catch (err) {
+        console.error('Error during registration:', err);
+        res.status(500).send('Error registering user');
+      }
     }
-
-    try {
-      const hashedPassword = bcrypt.hashSync(password, 10);
-      await db.query('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [
-        username,
-        hashedPassword,
-        email,
-      ]);
-
-      res.render('register', { errorMessage: null, registrationSuccess: true });
-    } catch (err) {
-      console.error('Error during registration:', err);
-      res.status(500).send('Error registering user');
-    }
-  });
+  );
+  
 
   // Login Route
   app.get('/login', (req, res) => {
     res.render('login');
   });
 
-  app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-
-    try {
-      const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
-      if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
-        req.session.user = { id: results[0].id, username: results[0].username };
-        res.redirect('/tasks');
-      } else {
-        res.send('Invalid username or password');
+  app.post(
+    '/login',
+    [
+      body('username').notEmpty().withMessage('Username is required'),
+      body('password').notEmpty().withMessage('Password is required'),
+    ],
+    async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).send(errors.array().map(err => err.msg).join(', '));
       }
-    } catch (err) {
-      console.error('Error during login:', err);
-      res.status(500).send('Server error during login');
+  
+      const { username, password } = req.body;
+  
+      try {
+        const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+        if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
+          req.session.user = { id: results[0].id, username: results[0].username };
+          res.redirect('/tasks');
+        } else {
+          res.send('Invalid username or password');
+        }
+      } catch (err) {
+        console.error('Error during login:', err);
+        res.status(500).send('Server error during login');
+      }
     }
-  });
+  );  
 
   // Logout Route
   app.get('/logout', (req, res) => {

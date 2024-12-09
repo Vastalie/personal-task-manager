@@ -166,7 +166,7 @@ app.get('/about', (req, res) => {
       res.status(500).send('Internal Server Error');
     }
   });
-  
+
   // Route for viewing all tasks
   app.get('/tasks', async (req, res) => {
     try {
@@ -279,6 +279,17 @@ app.get('/tasks', async (req, res) => {
   }
 );
 
+//completed tasks
+app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
+  try {
+      const { id } = req.params; // Get task ID from the route parameter
+      await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
+      res.redirect('/tasks'); // Redirect back to the tasks page
+  } catch (err) {
+      console.error('Error marking task as completed:', err);
+      res.status(500).send('Internal Server Error');
+  }
+});
 
   // Mark task as pending
   app.post('/tasks/:id/pending', requireLogin, async (req, res) => {

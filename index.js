@@ -9,6 +9,8 @@ const mysql = require('mysql2/promise');
 const session = require('express-session');
 const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
+const nodemailer = require('nodemailer');
+
 
 const app = express();
 
@@ -16,8 +18,8 @@ const app = express();
   // Create the database connection
   const db = await mysql.createConnection({
     host: 'localhost',
-    user: 'appuser',
-    password: 'shaina071199', // Replace with your actual password
+    user: 'admin',
+    password: 'Shaina071199', // Replace with your actual password
     database: 'personal_task_manager',
   });
 
@@ -371,6 +373,82 @@ app.get('/registered-users', async (req, res) => {
       res.redirect('/tasks');
     });
   });
+
+  //Route to Handle Forgotten Password Requests
+//This route generates a reset token and sends a reset email
+
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        // Check if user exists
+        const [user] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+        if (!user) {
+            return res.status(404).json({ message: 'Email not found' });
+        }
+
+        // Generate a reset token
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+
+        // Store token in the database
+        await db.query('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)', [
+            user.id,
+            token,
+            expiresAt,
+        ]);
+
+        // Send email with reset link
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'your-email@gmail.com',
+                pass: 'your-email-password',
+            },
+        });
+
+        const resetUrl = `http://localhost:3000/reset-password/${token}`;
+        await transporter.sendMail({
+            to: email,
+            subject: 'Password Reset',
+            html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link is valid for 1 hour.</p>`,
+        });
+
+        res.json({ message: 'Password reset email sent!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+//Add a Route to Handle Password Reset
+//This route updates the password after successful verification.
+
+app.post('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    try {
+        // Find the token and check expiry
+        const [reset] = await db.query('SELECT * FROM password_resets WHERE token = ?', [token]);
+        if (!reset || new Date() > new Date(reset.expires_at)) {
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the user's password
+        await db.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, reset.user_id]);
+
+        // Remove the token from the database
+        await db.query('DELETE FROM password_resets WHERE token = ?', [token]);
+
+        res.json({ message: 'Password successfully reset!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
   // Start the server
   const PORT = 8000;

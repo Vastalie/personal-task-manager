@@ -19,6 +19,7 @@
     "libraries": "^0.0.3",
     "mysql": "^2.18.1",
     "mysql2": "^3.11.3",
+    "nodemailer": "^6.9.16",
     "spotify-web-api-node": "^5.0.2"
   }
 }

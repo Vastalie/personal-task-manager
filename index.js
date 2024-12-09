@@ -205,6 +205,13 @@ app.get('/about', (req, res) => {
   });
   
 // Route to render the form for adding a new task
+app.get('/tasks/new', (req, res) => {
+  if (!req.session || !req.session.user) {
+      return res.redirect('/login'); // Redirect to login if not logged in
+  }
+  res.render('new-task'); // Render the new task creation page
+});
+
 app.get('/tasks', async (req, res) => {
   try {
       // Fetch all tasks from the database
@@ -212,16 +219,26 @@ app.get('/tasks', async (req, res) => {
           'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
       );
 
-      // Decrypt descriptions and prepare tasks
-      const formattedTasks = tasks.map((task) => ({
-          ...task,
-          decrypted_description: req.session && req.session.user
-              ? decrypt(task.encrypted_description, task.iv) // Decrypt for logged-in users
-              : task.encrypted_description, // Leave encrypted if no session
-          status: task.completed ? 'Completed' : 'Pending',
-      }));
+      // Process tasks
+      const formattedTasks = tasks.map((task) => {
+          // If the user is logged in, decrypt the description
+          if (req.session && req.session.user) {
+              return {
+                  ...task,
+                  decrypted_description: decrypt(task.encrypted_description, task.iv),
+                  status: task.completed ? 'Completed' : 'Pending',
+              };
+          }
+          // If the user is not logged in, keep the encrypted description
+          return {
+              ...task,
+              decrypted_description: null, // Do not expose the decrypted content
+              encrypted_description: task.encrypted_description, // Retain encrypted content
+              status: task.completed ? 'Completed' : 'Pending',
+          };
+      });
 
-      // Render the tasks page with both title and decrypted description
+      // Render the tasks page
       res.render('tasks', { user: req.session.user, tasks: formattedTasks });
   } catch (err) {
       console.error('Error loading tasks:', err);
@@ -487,8 +504,6 @@ app.post('/reset-password/:token',
       }
   }
 );
-
-
   // Start the server
   const PORT = 8000;
   // Start the server

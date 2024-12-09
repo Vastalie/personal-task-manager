@@ -7,27 +7,43 @@
 </head>
 <body>
     <h1>Task List</h1>
+
     <ul>
         <% tasks.forEach((task) => { %>
             <li>
-                <strong><%= task.priority %></strong>: 
-                <strong>Title:</strong> <%= task.title %> 
-                <strong>Description:</strong> <%= task.decrypted_description %> 
-                (Due: <%= new Date(task.due_date).toLocaleDateString() %>) 
+                <strong>Priority:</strong> <%= task.priority %><br>
+                <strong>Title:</strong> <%= task.title %><br>
+                <% if (user) { %>
+                    <!-- Show decrypted description if user is logged in -->
+                    <strong>Description:</strong> <%= task.decrypted_description %><br>
+                <% } else { %>
+                    <!-- Show encrypted description if user is logged out -->
+                    <strong>Description (Encrypted):</strong> <%= task.encrypted_description %><br>
+                <% } %>
+                <strong>Due Date:</strong> <%= new Date(task.due_date).toLocaleDateString() %> 
                 [<%= task.status %>]
-                <form action="/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
-                    <button type="submit">Mark as Completed</button>
-                </form>
-                <form action="/tasks/<%= task.id %>/pending" method="POST" style="display:inline;">
-                    <button type="submit">Mark as Pending</button>
-                </form>
-                <form action="/tasks/<%= task.id %>/delete" method="POST" style="display:inline;">
-                    <button type="submit">Delete</button>
-                </form>
+                <% if (user) { %>
+                    <!-- Show task actions only if the user is logged in -->
+                    <form action="/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
+                        <button type="submit">Mark as Completed</button>
+                    </form>
+                    <form action="/tasks/<%= task.id %>/pending" method="POST" style="display:inline;">
+                        <button type="submit">Mark as Pending</button>
+                    </form>
+                    <form action="/tasks/<%= task.id %>/delete" method="POST" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                <% } %>
             </li>
         <% }); %>
     </ul>
 
-    <a href="/logout">Logout</a>
+    <% if (user) { %>
+        <a href="/tasks/new">Add a New Task</a>
+        <br><br>
+        <a href="/logout">Logout</a>
+    <% } else { %>
+        <p><a href="/login">Log in</a> to manage tasks.</p>
+    <% } %>
 </body>
 </html>

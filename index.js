@@ -12,6 +12,8 @@ const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
 const SpotifyWebApi = require('spotify-web-api-node');
 
+const baseUrl = '/usr/745'; // Adjust if needed
+
 const app = express();
 
 (async () => {
@@ -30,11 +32,9 @@ const app = express();
     return;
   }
 
-  // Set EJS as the templating engine and set the views directory
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
 
-  // Middleware for session management
   app.use(
     session({
       secret: 'your_secret_key',
@@ -43,19 +43,14 @@ const app = express();
     })
   );
 
-  // Serve static files from the "public" folder
   app.use(express.static(path.join(__dirname, 'public')));
-
-  // Middleware to parse form data
   app.use(express.urlencoded({ extended: true }));
 
-  // Middleware to make `taskManagerData` available globally in all views
   app.use((req, res, next) => {
     res.locals.taskManagerData = { appName: "Personal Task Manager" };
     next();
   });
 
-  // Middleware to check if the user is logged in
   function requireLogin(req, res, next) {
     if (!req.session.user) {
       return res.redirect(baseUrl + '/login');
@@ -68,7 +63,6 @@ const app = express();
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
   });
 
-  // Get an access token
   (async () => {
     try {
       const data = await spotifyApi.clientCredentialsGrant();
@@ -89,10 +83,9 @@ const app = express();
     }
   })();
 
-  // Root route (Task Manager page)
   app.get(baseUrl + '/', async (req, res) => {
     try {
-      const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46'); // Replace with your playlist ID
+      const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
       res.render('index', { playlist: playlistData.body });
     } catch (err) {
       console.error('Error fetching Spotify playlist:', err);
@@ -114,7 +107,6 @@ const app = express();
     res.render('about');
   });
 
-  // Dashboard Route
   app.get(baseUrl + '/dashboard', requireLogin, async (req, res) => {
     try {
       const [metricsRow] = await db.query(`
@@ -158,7 +150,6 @@ const app = express();
     }
   });
 
-  // Route for viewing all tasks
   app.get(baseUrl + '/tasks', async (req, res) => {
     try {
       const [tasks] = await db.query(
@@ -185,9 +176,7 @@ const app = express();
       res.status(500).send('Internal Server Error');
     }
   });
-  
-  // Route to render the form for adding a new task
-  // Keeping the ./ as requested by user
+
   app.get(baseUrl + './tasks/new', (req, res) => {
     if (!req.session || !req.session.user) {
       return res.redirect(baseUrl + '/login');
@@ -195,9 +184,6 @@ const app = express();
     res.render('new-task');
   });
 
-  // Removing the duplicate app.get('./tasks', ...) route block
-
-  // Route to handle form submission for adding a new task
   app.post(baseUrl + './tasks/new', requireLogin,
     [
       body('title').notEmpty().withMessage('Task title is required'),
@@ -223,8 +209,6 @@ const app = express();
           'INSERT INTO tasks (title, encrypted_description, iv, due_date, completed, priority, user_id) VALUES (?, ?, ?, ?, 0, ?, ?)',
           [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
         );
-
-        // Redirect to tasks page without relative dot, to avoid nested path issues
         res.redirect(baseUrl + '/tasks');
       } catch (err) {
         console.error('Error adding task:', err);
@@ -233,12 +217,10 @@ const app = express();
     }
   );
 
-  // Mark tasks as completed
   app.post(baseUrl + '/tasks/:id/complete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]);
-      // Use absolute redirect to avoid nested path issues
       res.redirect(baseUrl + '/tasks');
     } catch (err) {
       console.error('Error marking task as completed:', err);
@@ -246,7 +228,6 @@ const app = express();
     }
   });
 
-  // Mark task as pending
   app.post(baseUrl + './tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
@@ -258,7 +239,6 @@ const app = express();
     }
   });
 
-  // Delete a task
   app.post(baseUrl + './tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
@@ -270,7 +250,6 @@ const app = express();
     }
   });
 
-  // Search Tasks
   app.get(baseUrl + '/search', requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
 
@@ -293,7 +272,6 @@ const app = express();
     }
   });
 
-  // Route to fetch and display registered users
   app.get(baseUrl + '/registered-users', async (req, res) => {
     try {
       const [results] = await db.query('SELECT username, email, created_at FROM users');
@@ -304,7 +282,6 @@ const app = express();
     }
   });
 
-  // Register Route
   app.get(baseUrl + '/register', (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
   });
@@ -343,7 +320,6 @@ const app = express();
     }
   );
 
-  // Login Route
   app.get(baseUrl + '/login', (req, res) => {
     res.render('login');
   });
@@ -377,7 +353,6 @@ const app = express();
     }
   );
 
-  // Logout Route
   app.get(baseUrl + '/logout', (req, res) => {
     req.session.destroy(err => {
       if (err) {
@@ -388,5 +363,8 @@ const app = express();
     });
   });
 
-
+  const PORT = process.env.PORT || 8000;
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 })();

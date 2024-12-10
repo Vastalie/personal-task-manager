@@ -9,21 +9,31 @@
     <h1>Task List</h1>
 
     <ul>
-        <% tasks.forEach((task) => { %>
+        <% tasks.forEach((task) => {
+            const dueDate = new Date(task.due_date);
+            const now = new Date();
+            let statusText;
+
+            if (task.completed) {
+                statusText = "Completed";
+            } else if (dueDate && now > dueDate) {
+                statusText = "Overdue";
+            } else {
+                statusText = "Pending";
+            }
+        %>
             <li>
                 <strong>Priority:</strong> <%= task.priority %><br>
                 <strong>Title:</strong> <%= task.title %><br>
                 <% if (user) { %>
-                    <!-- Show decrypted description if user is logged in -->
                     <strong>Description:</strong> <%= task.decrypted_description %><br>
                 <% } else { %>
-                    <!-- Show encrypted description if user is logged out -->
                     <strong>Description (Encrypted):</strong> <%= task.encrypted_description %><br>
                 <% } %>
-                <strong>Due Date:</strong> <%= new Date(task.due_date).toLocaleDateString() %> 
-                [<%= task.status %>]
+                
+                <strong>Due Date:</strong> <%= dueDate.toLocaleDateString() %> [<%= statusText %>]
+
                 <% if (user) { %>
-                    <!-- Show task actions only if the user is logged in -->
                     <form action="/usr/745/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
                         <button type="submit">Mark as Completed</button>
                     </form>

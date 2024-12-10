@@ -1,4 +1,3 @@
-
 require('dotenv').config();
   //spotify console
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
@@ -60,7 +59,7 @@ const app = express();
 
   // Middleware to check if the user is logged in
   function requireLogin(req, res, next) {
-    if ( !req.session||!req.session.user) {
+    if (!req.session.user) {
       return res.redirect('/login');
     }
     next();
@@ -170,7 +169,7 @@ app.get('/about', (req, res) => {
   });
 
   // Route for viewing all tasks
-  app.get('./tasks', async (req, res) => {
+  app.get('/tasks', async (req, res) => {
     try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(
@@ -235,7 +234,7 @@ app.get('/tasks', async (req, res) => {
       });
 
       // Render the tasks page
-      res.render('./tasks', { user: req.session.user, tasks: formattedTasks });
+      res.render('tasks', { user: req.session.user, tasks: formattedTasks });
   } catch (err) {
       console.error('Error loading tasks:', err);
       res.status(500).send('Internal Server Error');
@@ -244,7 +243,9 @@ app.get('/tasks', async (req, res) => {
 
 
  // Route to handle form submission for adding a new task
- app.post('/tasks/new', requireLogin,
+ app.post(
+  '/tasks/new',
+  requireLogin,
   [
     body('title').notEmpty().withMessage('Task title is required'),
     body('description').notEmpty().withMessage('Task description is required'),
@@ -280,12 +281,11 @@ app.get('/tasks', async (req, res) => {
 );
 
 //completed tasks
-app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
+app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
-      // Changed relative redirect to absolute so it works correctly
-      res.redirect('./tasks');
+      res.redirect('/tasks'); // Redirect back to the tasks page
   } catch (err) {
       console.error('Error marking task as completed:', err);
       res.status(500).send('Internal Server Error');
@@ -293,12 +293,11 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
 });
 
   // Mark task as pending
-  app.post('/usr/745/tasks/:id/pending', requireLogin, async (req, res) => {
+  app.post('/tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
-      // Changed relative redirect to absolute so it works correctly
-      res.redirect('./tasks');
+      res.redirect('/tasks');
     } catch (err) {
       console.error('Error marking task as pending:', err);
       res.status(500).send('Error marking task as pending');
@@ -306,12 +305,11 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Delete a task
-  app.post('/usr/745/tasks/:id/delete', requireLogin, async (req, res) => {
+  app.post('/tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);
-      // Changed relative redirect to absolute so it works correctly
-      res.redirect('./tasks');
+      res.redirect('/tasks');
     } catch (err) {
       console.error('Error deleting task:', err);
       res.status(500).send('Error deleting task');
@@ -392,10 +390,7 @@ app.get('/registered-users', async (req, res) => {
       } catch (err) {
         console.error('Error during registration:', err);
         res.status(500).send('Error registering user');
-
-     
-     }
-
+      }
     }
   );
   
@@ -423,7 +418,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('./');
+          res.redirect('/tasks');
         } else {
           res.send('Invalid username or password');
         }

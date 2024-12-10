@@ -280,7 +280,7 @@ app.get('./tasks', async (req, res) => {
 );
 
 //completed tasks
-app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
+app.post('../tasks/:id/complete', requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
@@ -293,7 +293,7 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
 });
 
   // Mark task as pending
-  app.post('./tasks/:id/pending', requireLogin, async (req, res) => {
+  app.post('../tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
@@ -306,7 +306,7 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Delete a task
-  app.post('./tasks/:id/delete', requireLogin, async (req, res) => {
+  app.post('../tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);

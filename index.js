@@ -402,7 +402,7 @@ app.get('/registered-users', async (req, res) => {
   
 
   // Login Route
-  app.get('/usr/745/login', (req, res) => {
+  app.get('/login', (req, res) => {
     res.render('login');
   });
   

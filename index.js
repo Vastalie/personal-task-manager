@@ -200,7 +200,7 @@ app.get('/about', (req, res) => {
   });
   
 // Route to render the form for adding a new task
-app.get('/tasks/new', (req, res) => {
+app.get('./tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
   }
@@ -234,7 +234,7 @@ app.get('./tasks', async (req, res) => {
       });
 
       // Render the tasks page
-      res.render('tasks', { user: req.session.user, tasks: formattedTasks });
+      res.render('./tasks', { user: req.session.user, tasks: formattedTasks });
   } catch (err) {
       console.error('Error loading tasks:', err);
       res.status(500).send('Internal Server Error');
@@ -243,9 +243,7 @@ app.get('./tasks', async (req, res) => {
 
 
  // Route to handle form submission for adding a new task
- app.post(
-  '/tasks/new',
-  requireLogin,
+ app.post('./tasks/new', requireLogin,
   [
     body('title').notEmpty().withMessage('Task title is required'),
     body('description').notEmpty().withMessage('Task description is required'),

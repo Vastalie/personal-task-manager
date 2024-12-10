@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Add a New Task</h1>
-    <form action="/tasks/new" method="POST">
+    <form action="<%= baseUrl %>/tasks/new" method="POST">
         <label for="title">Task Title:</label>
         <input type="text" id="title" name="title" required>
         <br><br>
@@ -31,6 +31,6 @@
         <button type="submit">Add Task</button>
     </form>
 
-    <a href="/tasks">Back to View Tasks</a>
+    <a href="<%= baseUrl %>/tasks">Back to View Tasks</a>
 </body>
 </html>

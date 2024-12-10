@@ -10,6 +10,7 @@ const session = require('express-session');
 const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
+const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
 
 
 
@@ -50,22 +51,22 @@ const app = express();
   // Middleware to parse form data
   app.use(express.urlencoded({ extended: true }));
 
-  // Middleware to make `taskManagerData` available globally in all views
-  app.use((req, res, next) => {
-    res.locals.taskManagerData = { appName: "Personal Task Manager" };
-    next();
-  });
+ // Middleware to make `baseUrl` globally available in views
+ app.use((req, res, next) => {
+  res.locals.baseUrl = baseUrl;
+  next();
+});
 
   // Middleware to check if the user is logged in
   function requireLogin(req, res, next) {
     if (!req.session.user) {
-      return res.redirect('/login');
+      return res.redirect(`${baseUrl}/login`);
     }
     next();
   }
 
   // Root route (Task Manager page)
-  app.get('/', async (req, res) => {
+  app.get(`${baseUrl}/`, async (req, res) => {
     try {
         // Fetch the playlist using Spotify API
         const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46'); // Replace with your playlist ID
@@ -116,7 +117,7 @@ const spotifyApi = new SpotifyWebApi({
     }
 })();
 
-app.get('/about', (req, res) => {
+app.get(`${baseUrl}/about`, (req, res) => {
   res.render('about');
 });
 
@@ -168,7 +169,7 @@ app.get('/about', (req, res) => {
   });
 
   // Route for viewing all tasks
-  app.get('/tasks', async (req, res) => {
+  app.get(`${baseUrl}/tasks`, async (req, res) => {
     try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(
@@ -199,7 +200,7 @@ app.get('/about', (req, res) => {
   });
   
 // Route to render the form for adding a new task
-app.get('/tasks/new', (req, res) => {
+app.get(`${baseUrl}/tasks/new`, (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
   }
@@ -242,10 +243,7 @@ app.get('/tasks', async (req, res) => {
 
 
  // Route to handle form submission for adding a new task
- app.post(
-  '/tasks/new',
-  requireLogin,
-  [
+ app.post(`${baseUrl}/tasks/new`, requireLogin,[
     body('title').notEmpty().withMessage('Task title is required'),
     body('description').notEmpty().withMessage('Task description is required'),
     body('due_date').optional().isDate().withMessage('Invalid date format'),
@@ -271,7 +269,7 @@ app.get('/tasks', async (req, res) => {
         [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
       );
 
-      res.redirect('/tasks');
+      res.redirect(`${baseUrl}/tasks`);
     } catch (err) {
       console.error('Error adding task:', err);
       res.status(500).send('Error adding task');
@@ -280,11 +278,11 @@ app.get('/tasks', async (req, res) => {
 );
 
 //completed tasks
-app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
+app.post(`${baseUrl}/tasks/:id/complete`, requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
-      res.redirect('/tasks'); // Redirect back to the tasks page
+      res.redirect(`${baseUrl}/tasks`); // Redirect back to the tasks page
   } catch (err) {
       console.error('Error marking task as completed:', err);
       res.status(500).send('Internal Server Error');
@@ -292,7 +290,7 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
 });
 
   // Mark task as pending
-  app.post('/tasks/:id/pending', requireLogin, async (req, res) => {
+  app.post(`${baseUrl}/tasks/:id/pending`, requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
@@ -304,7 +302,7 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Delete a task
-  app.post('/tasks/:id/delete', requireLogin, async (req, res) => {
+  app.post(`${baseUrl}/tasks/:id/delete`, requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);
@@ -316,7 +314,7 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Search Tasks
-  app.get('/search', requireLogin, async (req, res) => {
+  app.get(`${baseUrl}/search`, requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
 
     try {
@@ -359,9 +357,7 @@ app.get('/registered-users', async (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
   });
 
-  app.post(
-    '/register',
-    [
+  app.post('/register',[
       body('username').notEmpty().withMessage('Username is required'),
       body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
       body('email').isEmail().withMessage('Invalid email address'),
@@ -392,16 +388,13 @@ app.get('/registered-users', async (req, res) => {
       }
     }
   );
-  
 
   // Login Route
-  app.get('/login', (req, res) => {
+  app.get(`${baseUrl}/login`, (req, res) => {
     res.render('login');
   });
 
-  app.post(
-    '/login',
-    [
+  app.post(`${baseUrl}/login`,[
       body('username').notEmpty().withMessage('Username is required'),
       body('password').notEmpty().withMessage('Password is required'),
     ],
@@ -417,7 +410,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/tasks');
+          res.redirect(`${baseUrl}/tasks`);
         } else {
           res.send('Invalid username or password');
         }
@@ -429,13 +422,13 @@ app.get('/registered-users', async (req, res) => {
   );  
 
   // Logout Route
-  app.get('/logout', (req, res) => {
+  app.get(`${baseUrl}/logout`, (req, res) => {
     req.session.destroy(err => {
       if (err) {
         console.error('Error during logout:', err);
         return res.status(500).send('Error during logout');
       }
-      res.redirect('/tasks');
+      res.redirect(`${baseUrl}/tasks`);
     });
   });
 

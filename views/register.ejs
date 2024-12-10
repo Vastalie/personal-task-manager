@@ -2,7 +2,7 @@
 <html>
 <head>
     <title><%= taskManagerData.appName %> - Register</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="<%= baseUrl %>/style.css">
 </head>
 <body>
     <h1>Register for <%= taskManagerData.appName %></h1>
@@ -11,14 +11,14 @@
         <p>Registration successful! Redirecting to the login page...</p>
         <script>
             setTimeout(() => {
-                window.location.href = '/login';
+                window.location.href = '<%= baseUrl %>/login';
             }, 3000); // Redirects after 3 seconds
         </script>
     <% } else if (errorMessage) { %>
         <p style="color: red;"><%= errorMessage %></p>
     <% } %>
     
-    <form action="/register" method="POST">
+    <form action="<%= baseUrl %>/register" method="POST">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
         

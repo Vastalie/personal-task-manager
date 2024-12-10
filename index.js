@@ -10,6 +10,7 @@ const session = require('express-session');
 const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
+const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
 
 
 
@@ -201,7 +202,7 @@ app.get('/about', (req, res) => {
 // Route to render the form for adding a new task
 app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
-      return res.redirect('/tasks'); // Redirect to login if not logged in
+      return res.redirect('/login'); // Redirect to login if not logged in
   }
   res.render('new-task'); // Render the new task creation page
 });
@@ -233,7 +234,7 @@ app.get('/tasks', async (req, res) => {
       });
 
       // Render the tasks page
-      res.render('/tasks', { user: req.session.user, tasks: formattedTasks });
+      res.render('tasks', { user: req.session.user, tasks: formattedTasks });
   } catch (err) {
       console.error('Error loading tasks:', err);
       res.status(500).send('Internal Server Error');
@@ -278,7 +279,6 @@ app.get('/tasks', async (req, res) => {
     }
   }
 );
-
 
 //completed tasks
 app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
@@ -418,7 +418,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/');
+          res.redirect('/tasks');
         } else {
           res.send('Invalid username or password');
         }

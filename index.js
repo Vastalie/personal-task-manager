@@ -207,7 +207,7 @@ app.get('/tasks/new', (req, res) => {
   res.render('new-task'); // Render the new task creation page
 });
 
-app.get('/tasks', async (req, res) => {
+app.get('./tasks', async (req, res) => {
   try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(

@@ -252,10 +252,7 @@ app.get('/tasks', async (req, res) => {
 
 
  // Route to handle form submission for adding a new task
- app.post(
-  '/tasks/new',
-  requireLogin,
-  [
+ app.post('/usr/745/tasks/new', requireLogin,[
     body('title').notEmpty().withMessage('Task title is required'),
     body('description').notEmpty().withMessage('Task description is required'),
     body('due_date').optional().isDate().withMessage('Invalid date format'),
@@ -281,7 +278,7 @@ app.get('/tasks', async (req, res) => {
         [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
       );
 
-      res.redirect('/tasks');
+      res.redirect('/usr/745/tasks');
     } catch (err) {
       console.error('Error adding task:', err);
       res.status(500).send('Error adding task');

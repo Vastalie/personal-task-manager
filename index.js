@@ -285,7 +285,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
       // Changed relative redirect to absolute so it works correctly
-      res.redirect('/tasks');
+      res.redirect('./tasks');
   } catch (err) {
       console.error('Error marking task as completed:', err);
       res.status(500).send('Internal Server Error');
@@ -298,7 +298,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
       // Changed relative redirect to absolute so it works correctly
-      res.redirect('/tasks');
+      res.redirect('./tasks');
     } catch (err) {
       console.error('Error marking task as pending:', err);
       res.status(500).send('Error marking task as pending');
@@ -311,7 +311,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);
       // Changed relative redirect to absolute so it works correctly
-      res.redirect('/tasks');
+      res.redirect('./tasks');
     } catch (err) {
       console.error('Error deleting task:', err);
       res.status(500).send('Error deleting task');

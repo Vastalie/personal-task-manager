@@ -12,8 +12,6 @@ const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
-
 const app = express();
 
 (async () => {

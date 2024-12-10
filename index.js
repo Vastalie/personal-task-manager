@@ -293,7 +293,7 @@ app.get('/tasks/:id/complete', requireLogin, async (req, res) => {
   }
 });
 
-app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
+app.post('./tasks/:id/complete', requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database

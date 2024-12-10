@@ -271,7 +271,7 @@ app.get('/tasks', async (req, res) => {
         [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
       );
 
-      res.redirect('/tasks');
+      res.redirect('./tasks');
     } catch (err) {
       console.error('Error adding task:', err);
       res.status(500).send('Error adding task');

@@ -12,8 +12,7 @@ const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-// Set your base URL here
-const baseUrl = '/usr/745';
+const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
 
 const app = express();
 
@@ -71,7 +70,17 @@ const app = express();
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
   });
 
-  // Get Spotify access token
+  // Get an access token
+  (async () => {
+    try {
+      const data = await spotifyApi.clientCredentialsGrant();
+      spotifyApi.setAccessToken(data.body['access_token']);
+      console.log('Spotify API connected');
+    } catch (err) {
+      console.error('Error connecting to Spotify API:', err);
+    }
+  })();
+
   (async () => {
     try {
       const data = await spotifyApi.clientCredentialsGrant();
@@ -85,11 +94,11 @@ const app = express();
   // Root route (Task Manager page)
   app.get(baseUrl + '/', async (req, res) => {
     try {
-      const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
+      const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46'); // Replace with your playlist ID
       res.render('index', { playlist: playlistData.body });
     } catch (err) {
       console.error('Error fetching Spotify playlist:', err);
-      res.render('index', { playlist: null });
+      res.render('index', { playlist: null }); 
     }
   });
 
@@ -151,12 +160,13 @@ const app = express();
     }
   });
 
-  // View all tasks
+  // Route for viewing all tasks
   app.get(baseUrl + '/tasks', async (req, res) => {
     try {
       const [tasks] = await db.query(
         'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
       );
+  
       const formattedTasks = tasks.map((task) => {
         if (req.session && req.session.user) {
           return {
@@ -170,26 +180,27 @@ const app = express();
           status: task.completed ? 'Completed' : 'Pending',
         };
       });
-
+  
       res.render('tasks', { user: req.session.user, tasks: formattedTasks });
     } catch (err) {
       console.error('Error loading tasks:', err);
       res.status(500).send('Internal Server Error');
     }
   });
-
-  // New task form
-  app.get(baseUrl + '/tasks/new', (req, res) => {
+  
+  // Route to render the form for adding a new task
+  // Keeping the ./ as requested by user
+  app.get(baseUrl + './tasks/new', (req, res) => {
     if (!req.session || !req.session.user) {
       return res.redirect(baseUrl + '/login');
     }
     res.render('new-task');
   });
 
-  // Add new task
-  app.post(
-    baseUrl + '/tasks/new',
-    requireLogin,
+  // Removing the duplicate app.get('./tasks', ...) route block
+
+  // Route to handle form submission for adding a new task
+  app.post(baseUrl + './tasks/new', requireLogin,
     [
       body('title').notEmpty().withMessage('Task title is required'),
       body('description').notEmpty().withMessage('Task description is required'),
@@ -214,6 +225,8 @@ const app = express();
           'INSERT INTO tasks (title, encrypted_description, iv, due_date, completed, priority, user_id) VALUES (?, ?, ?, ?, 0, ?, ?)',
           [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
         );
+
+        // Redirect to tasks page without relative dot, to avoid nested path issues
         res.redirect(baseUrl + '/tasks');
       } catch (err) {
         console.error('Error adding task:', err);
@@ -222,11 +235,12 @@ const app = express();
     }
   );
 
-  // Mark task as completed
+  // Mark tasks as completed
   app.post(baseUrl + '/tasks/:id/complete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]);
+      // Use absolute redirect to avoid nested path issues
       res.redirect(baseUrl + '/tasks');
     } catch (err) {
       console.error('Error marking task as completed:', err);
@@ -235,7 +249,7 @@ const app = express();
   });
 
   // Mark task as pending
-  app.post(baseUrl + '/tasks/:id/pending', requireLogin, async (req, res) => {
+  app.post(baseUrl + './tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
@@ -247,7 +261,7 @@ const app = express();
   });
 
   // Delete a task
-  app.post(baseUrl + '/tasks/:id/delete', requireLogin, async (req, res) => {
+  app.post(baseUrl + './tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);
@@ -258,9 +272,10 @@ const app = express();
     }
   });
 
-  // Search tasks
+  // Search Tasks
   app.get(baseUrl + '/search', requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
+
     try {
       const [tasks] = await db.query('SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks');
       const results = tasks
@@ -280,7 +295,7 @@ const app = express();
     }
   });
 
-  // Registered users
+  // Route to fetch and display registered users
   app.get(baseUrl + '/registered-users', async (req, res) => {
     try {
       const [results] = await db.query('SELECT username, email, created_at FROM users');
@@ -291,7 +306,7 @@ const app = express();
     }
   });
 
-  // Register
+  // Register Route
   app.get(baseUrl + '/register', (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
   });
@@ -330,7 +345,7 @@ const app = express();
     }
   );
 
-  // Login
+  // Login Route
   app.get(baseUrl + '/login', (req, res) => {
     res.render('login');
   });
@@ -364,7 +379,7 @@ const app = express();
     }
   );
 
-  // Logout
+  // Logout Route
   app.get(baseUrl + '/logout', (req, res) => {
     req.session.destroy(err => {
       if (err) {

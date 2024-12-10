@@ -202,7 +202,7 @@ app.get('/about', (req, res) => {
 // Route to render the form for adding a new task
 app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
-      return res.redirect('/login'); // Redirect to login if not logged in
+      return res.redirect('/tasks'); // Redirect to login if not logged in
   }
   res.render('new-task'); // Render the new task creation page
 });
@@ -430,7 +430,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('`${baseUrl}/');
+          res.redirect(baseUrl + '/');
         } else {
           res.send('Invalid username or password');
         }

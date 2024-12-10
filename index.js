@@ -362,7 +362,7 @@ app.get('/registered-users', async (req, res) => {
 
 
   // Register Route
-  app.get('/register', (req, res) => {
+  app.get('usr/745/register', (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
   });
 

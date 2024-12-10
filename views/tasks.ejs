@@ -24,7 +24,7 @@
                 [<%= task.status %>]
                 <% if (user) { %>
                     <!-- Show task actions only if the user is logged in -->
-                    <form action="/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
+                    <form action="/usr/745/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
                         <button type="submit">Mark as Completed</button>
                     </form>
                     <form action="/tasks/<%= task.id %>/pending" method="POST" style="display:inline;">

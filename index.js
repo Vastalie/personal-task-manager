@@ -10,13 +10,13 @@ const session = require('express-session');
 const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
-const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
 
 
 
 const app = express();
 
 (async () => {
+  
   // Create the database connection
   const db = await mysql.createConnection({
     host: 'localhost',
@@ -216,21 +216,30 @@ app.get('/tasks', async (req, res) => {
 
       // Process tasks
       const formattedTasks = tasks.map((task) => {
-          // If the user is logged in, decrypt the description
+        try {
           if (req.session && req.session.user) {
+            // Only decrypt if both encrypted_description and iv are valid
+            if (task.encrypted_description && task.iv) {
               return {
-                  ...task,
-                  decrypted_description: decrypt(task.encrypted_description, task.iv),
-                  status: task.completed ? 'Completed' : 'Pending',
+                ...task,
+                decrypted_description: decrypt(task.encrypted_description, task.iv), // Decrypt for logged-in users
+                status: task.completed ? 'Completed' : 'Pending',
               };
+            } else {
+              console.warn(`Missing encrypted_description or iv for task ID: ${task.id}`);
+            }
           }
-          // If the user is not logged in, keep the encrypted description
           return {
-              ...task,
-              decrypted_description: null, // Do not expose the decrypted content
-              encrypted_description: task.encrypted_description, // Retain encrypted content
-              status: task.completed ? 'Completed' : 'Pending',
+            ...task,
+            status: task.completed ? 'Completed' : 'Pending',
           };
+        } catch (err) {
+          console.error(`Error decrypting task ID ${task.id}:`, err.message);
+          return {
+            ...task,
+            status: task.completed ? 'Completed' : 'Pending',
+          };
+        }
       });
 
       // Render the tasks page
@@ -281,7 +290,7 @@ app.get('/tasks', async (req, res) => {
 );
 
 //completed tasks
-app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
+app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
@@ -418,7 +427,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/tasks');
+          res.redirect('/');
         } else {
           res.send('Invalid username or password');
         }
@@ -436,7 +445,7 @@ app.get('/registered-users', async (req, res) => {
         console.error('Error during logout:', err);
         return res.status(500).send('Error during logout');
       }
-      res.redirect('/tasks');
+      res.redirect('/');
     });
   });
 

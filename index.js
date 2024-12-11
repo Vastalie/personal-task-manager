@@ -188,7 +188,7 @@ app.get('/about', (req, res) => {
   });
   
 // Route to render the form for adding a new task
-app.get('/tasks', (req, res) => {
+app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
   }

@@ -110,7 +110,7 @@ app.get('/about', (req, res) => {
 });
 
   // Dashboard Route
-  app.get('/dashboard', requireLogin, async (req, res) => {
+  app.get('/usr/745/dashboard', requireLogin, async (req, res) => {
     try {
       const [metricsRow] = await db.query(`
         SELECT 
@@ -149,7 +149,18 @@ app.get('/about', (req, res) => {
         monthlyData[row.month - 1] = row.task_count;
       });
 
-      res.render('dashboard', { metrics, monthlyData });
+
+    // Count overdue tasks for today specifically
+    const [todayOverdueRows] = await db.query(`
+      SELECT 
+        COUNT(*) AS today_overdue
+      FROM tasks
+      WHERE completed = 0 AND due_date = CURDATE()
+    `);
+
+    const todayOverdue = todayOverdueRows[0]?.today_overdue || 0;
+
+      res.render('dashboard', { metrics, monthlyData, todayOverdue});
     } catch (err) {
       console.error('Error loading dashboard:', err);
       res.status(500).send('Internal Server Error');

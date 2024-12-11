@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,16 +6,71 @@
     <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Styles omitted for brevity */
+        /* Basic Dashboard Styles */
+        body {
+            background-color: #1e1e2f;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            background-color: #2d2d3d;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .card h2 {
+            font-size: 1.2em;
+            color: #80d0c7;
+            margin-bottom: 10px;
+        }
+        .metric {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        .chart-container {
+            position: relative;
+            height: 180px;
+            width: 100%;
+        }
+        .bar-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .bar-label {
+            width: 30%;
+            font-size: 0.8em;
+            padding-right: 10px;
+            color: #ffffff;
+        }
+        .bar {
+            width: 70%;
+            height: 8px;
+            background-color: #3a3a4a;
+            position: relative;
+            border-radius: 4px;
+        }
+        .bar-fill {
+            background-color: #80d0c7;
+            height: 100%;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
     <h1 style="text-align: center; padding: 20px; color: #80d0c7;">Dashboard</h1>
     <header style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
         <h1 style="color: #80d0c7;">Dashboard</h1>
-        <button id="theme-toggle" style="padding: 10px; cursor: pointer;">Switch Theme</button>
+        <!-- Add the Theme Toggle Button Here -->
+        <button id="theme-toggle" style="padding: 10px; cursor: pointer;">Switch Theme
+        </button>
     </header>
-
+    <!-- Dashboard Data -->
     <div class="dashboard" 
          data-total-tasks="<%= metrics.total_tasks %>" 
          data-completed-tasks="<%= metrics.completed_tasks %>" 
@@ -24,7 +78,7 @@
          data-overdue-tasks="<%= metrics.overdue_tasks %>" 
          data-monthly-data='<%- JSON.stringify(monthlyData) %>'>
         
-        <!-- Tasks Overview -->
+        <!-- Card 1: Tasks Overview Metric -->
         <div class="card">
             <h2>Tasks Overview</h2>
             <div class="metric">Total: <%= metrics.total_tasks %></div>
@@ -41,15 +95,9 @@
                     <div id="pending-bar" class="bar-fill"></div>
                 </div>
             </div>
-            <div class="bar-container">
-                <div class="bar-label">Overdue</div>
-                <div class="bar">
-                    <div id="overdue-bar" class="bar-fill"></div>
-                </div>
-            </div>
         </div>
 
-        <!-- Monthly Task Chart -->
+        <!-- Card 2: Monthly Task Chart -->
         <div class="card">
             <h2>Monthly Tasks</h2>
             <div class="chart-container">
@@ -57,7 +105,7 @@
             </div>
         </div>
 
-        <!-- Task Status Breakdown -->
+        <!-- Card 3: Task Status Breakdown (Pie Chart) -->
         <div class="card">
             <h2>Task Status Breakdown</h2>
             <div class="chart-container">
@@ -66,59 +114,137 @@
         </div>
     </div>
 
+    <!-- Inline JavaScript -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const dashboardElement = document.querySelector('.dashboard');
-            const totalTasks = parseInt(dashboardElement.getAttribute('data-total-tasks'), 10) || 0;
-            const completedTasks = parseInt(dashboardElement.getAttribute('data-completed-tasks'), 10) || 0;
-            const pendingTasks = parseInt(dashboardElement.getAttribute('data-pending-tasks'), 10) || 0;
-            const overdueTasks = parseInt(dashboardElement.getAttribute('data-overdue-tasks'), 10) || 0;
-            const monthlyData = JSON.parse(dashboardElement.getAttribute('data-monthly-data')) || Array(12).fill(0);
+            try {
+                // Fetch data attributes from the dashboard container
+                const dashboardElement = document.querySelector('.dashboard');
+                const totalTasks = parseInt(dashboardElement.getAttribute('data-total-tasks'), 10);
+                const completedTasks = parseInt(dashboardElement.getAttribute('data-completed-tasks'), 10);
+                const pendingTasks = parseInt(dashboardElement.getAttribute('data-pending-tasks'), 10);
+                const overdueTasks = parseInt(dashboardElement.getAttribute('data-overdue-tasks'), 10);
 
-            // Set progress bars
-            document.getElementById('completed-bar').style.width = totalTasks ? (completedTasks / totalTasks) * 100 + '%' : '0%';
-            document.getElementById('pending-bar').style.width = totalTasks ? (pendingTasks / totalTasks) * 100 + '%' : '0%';
-            document.getElementById('overdue-bar').style.width = totalTasks ? (overdueTasks / totalTasks) * 100 + '%' : '0%';
+                // Set up the progress bars
+                document.getElementById('completed-bar').style.width = totalTasks ? (completedTasks / totalTasks) * 100 + '%' : '0%';
+                document.getElementById('pending-bar').style.width = totalTasks ? (pendingTasks / totalTasks) * 100 + '%' : '0%';
 
-            // Monthly Chart
-            const monthlyCtx = document.getElementById('monthlyTasksChart').getContext('2d');
-            new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: 'Tasks Completed Each Month',
-                        data: monthlyData,
-                        backgroundColor: '#80d0c7',
-                        borderRadius: 5,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: '#ffffff' } },
-                        x: { ticks: { color: '#ffffff' } }
+                // Parse monthlyData and ensure it has 12 values
+                let monthlyData = JSON.parse(dashboardElement.getAttribute('data-monthly-data'));
+                if (!Array.isArray(monthlyData) || monthlyData.length !== 12) {
+                    console.warn("monthlyData is invalid or incomplete. Using sample data for testing.");
+                    monthlyData = [5, 10, 15, 20, 25, 10, 15, 10, 5, 10, 15, 20]; // Sample data for testing
+                }
+
+                // Log data for debugging purposes
+                console.log("Dashboard Metrics:", { totalTasks, completedTasks, pendingTasks, overdueTasks });
+                console.log("Monthly Data:", monthlyData);
+
+                // Monthly tasks bar chart
+                const monthlyTasksCtx = document.getElementById('monthlyTasksChart').getContext('2d');
+new Chart(monthlyTasksCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+            label: 'Tasks Completed Each Month',
+            data: [5, 4, 6, 5, 6, 4, 6, 5, 7, 4, 7, 6], // Example values with more variation
+            backgroundColor: '#80d0c7',
+            borderRadius: 5,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false, // Allow dynamic resizing
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: Math.ceil(Math.max(...monthlyData) + 1), // Dynamic max for taller bars
+                ticks: {
+                    color: '#ffffff',
+                    stepSize: 1 // Smaller increments
+                }
+            },
+            x: {
+                ticks: { color: '#ffffff' }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: { color: '#ffffff' }
+            }
+        }
+    }
+});
+                // Task status pie chart
+                const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
+                new Chart(taskStatusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Completed', 'Pending', 'Overdue'],
+                        datasets: [{
+                            data: [completedTasks, pendingTasks, overdueTasks],
+                            backgroundColor: ['#80d0c7', '#ffcc00', '#ff6347']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { labels: { color: '#ffffff' } } }
                     }
-                }
-            });
-
-            // Task Status Pie Chart
-            const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
-            new Chart(taskStatusCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Completed', 'Pending', 'Overdue'],
-                    datasets: [{
-                        data: [completedTasks, pendingTasks, overdueTasks],
-                        backgroundColor: ['#80d0c7', '#ffcc00', '#ff6347']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { labels: { color: '#ffffff' } } }
-                }
-            });
+                });
+            } catch (error) {
+                console.error("Error initializing charts:", error);
+            }
         });
-    </script>
+    </script>    
+<script>
+    const themeToggleButton = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    // Add event listener for theme toggle
+    themeToggleButton.addEventListener('click', () => {
+        // Toggle the light-mode class
+        document.body.classList.toggle('light-mode');
+
+        // Check if light mode is active
+        const isLightMode = document.body.classList.contains('light-mode');
+
+        // Save the theme preference to localStorage
+        localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+
+        // Update the button text and icon dynamically
+        themeToggleButton.innerText = isLightMode ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+    });
+
+    // Apply the saved theme on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeIcon.innerText = '☀️'; // Update icon for light mode
+            themeToggleButton.innerText = 'Switch to Dark Mode';
+        }
+    });
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isLightMode = document.body.classList.contains('light-mode');
+
+    // Find all legend labels and update their colour
+    const legendLabels = document.querySelectorAll('.chartjs-legend li');
+    legendLabels.forEach((label) => {
+        label.style.color = isLightMode ? '#000000' : '#ffffff'; // Black for light mode, white for dark mode
+    });
+});
+
+// colours match saved theme on page load
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        const legendLabels = document.querySelectorAll('.chartjs-legend li');
+        legendLabels.forEach((label) => {
+            label.style.color = '#000000'; // Black for light mode
+        });
+    }
+});
+</script>
 </body>
 </html>

@@ -202,7 +202,7 @@ app.get('/about', (req, res) => {
 // Route to render the form for adding a new task
 app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
-      return res.redirect('/usr/745/tasks'); // Redirect to login if not logged in
+      return res.redirect('/usr/745/tasks/new'); // Redirect to login if not logged in
   }
   res.render('new-task'); // Render the new task creation page
 });

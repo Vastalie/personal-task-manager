@@ -231,7 +231,7 @@ app.get('/tasks', async (req, res) => {
 
 
  // Route to handle form submission for adding a new task
- app.post('/usr/745//tasks/new',
+ app.post('/usr/745/tasks/new',
   requireLogin,
   [
     body('title').notEmpty().withMessage('Task title is required'),

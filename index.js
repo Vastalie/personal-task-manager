@@ -110,51 +110,68 @@ app.get('/about', (req, res) => {
 });
 
   // Dashboard Route
-  app.get('/dashboard', requireLogin, async (req, res) => {
-    try {
+ // Dashboard Route
+app.get('/dashboard', requireLogin, async (req, res) => {
+  try {
+      // Fetch overall task metrics
       const [metricsRow] = await db.query(`
-        SELECT 
-          COUNT(*) AS total_tasks,
-          SUM(completed = 1) AS completed_tasks,
-          SUM(completed = 0 AND due_date >= CURDATE()) AS pending_tasks,
-          SUM(completed = 0 AND due_date < CURDATE()) AS overdue_tasks
-        FROM tasks
+          SELECT 
+              COUNT(*) AS total_tasks,
+              SUM(completed = 1) AS completed_tasks,
+              SUM(completed = 0 AND due_date >= CURDATE()) AS pending_tasks,
+              SUM(completed = 0 AND due_date < CURDATE()) AS overdue_tasks
+          FROM tasks
       `);
+
+      // Check if metricsRow exists and contains data
+      if (!metricsRow || metricsRow.length === 0) {
+          console.error('Metrics row is empty or undefined');
+          return res.status(500).send('No metrics data available');
+      }
 
       const metrics = metricsRow[0];
 
+      // Fetch monthly completed task data
       const [monthlyRows] = await db.query(`
-        SELECT 
-          m.month AS month, 
-          COALESCE(t.task_count, 0) AS task_count
-        FROM (
-          SELECT 1 AS month UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
-          UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8
-          UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
-        ) AS m
-        LEFT JOIN (
           SELECT 
-              MONTH(due_date) AS month,
-              COUNT(*) AS task_count
-          FROM tasks
-          WHERE completed = 1
-          GROUP BY MONTH(due_date)
-        ) AS t
-        ON m.month = t.month
-        ORDER BY m.month;
+              m.month AS month, 
+              COALESCE(t.task_count, 0) AS task_count
+          FROM (
+              SELECT 1 AS month UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8
+              UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
+          ) AS m
+          LEFT JOIN (
+              SELECT 
+                  MONTH(due_date) AS month,
+                  COUNT(*) AS task_count
+              FROM tasks
+              WHERE completed = 1
+              GROUP BY MONTH(due_date)
+          ) AS t
+          ON m.month = t.month
+          ORDER BY m.month;
       `);
 
+      // Prepare monthly data for the chart
       const monthlyData = Array(12).fill(0);
       monthlyRows.forEach(row => {
-        monthlyData[row.month - 1] = row.task_count;
+          monthlyData[row.month - 1] = row.task_count;
       });
-      
-      res.render('dashboard', { metrics, monthlyData, todayOverdue});
-    } catch (err) {
-      console.error('Error loading dashboard:', err);
+
+      // Log the metrics and monthly data for debugging
+      console.log('Metrics:', metrics);
+      console.log('Monthly Data:', monthlyData);
+
+      // Render the dashboard page with metrics and monthly data
+      res.render('dashboard', { metrics, monthlyData });
+  } catch (err) {
+      console.error('Error loading dashboard:', err.message);
+      console.error(err.stack);
       res.status(500).send('Internal Server Error');
-    }
-  });
+  }
+});
+
 
   // Route for viewing all tasks
   app.get('/tasks', async (req, res) => {

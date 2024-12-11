@@ -430,7 +430,7 @@ app.get('/registered-users', async (req, res) => {
         console.error('Error during logout:', err);
         return res.status(500).send('Error during logout');
       }
-      res.redirect('/tasks');
+      res.redirect('/usr/745/');
     });
   });
 

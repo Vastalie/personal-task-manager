@@ -148,18 +148,7 @@ app.get('/about', (req, res) => {
       monthlyRows.forEach(row => {
         monthlyData[row.month - 1] = row.task_count;
       });
-
-
-    // Count overdue tasks for today specifically
-    const [todayOverdueRows] = await db.query(`
-      SELECT 
-        COUNT(*) AS today_overdue
-      FROM tasks
-      WHERE completed = 0 AND due_date = CURDATE()
-    `);
-
-    const todayOverdue = todayOverdueRows[0]?.today_overdue || 0;
-
+      
       res.render('dashboard', { metrics, monthlyData, todayOverdue});
     } catch (err) {
       console.error('Error loading dashboard:', err);

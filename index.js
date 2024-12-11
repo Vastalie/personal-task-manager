@@ -388,9 +388,7 @@ app.get('/registered-users', async (req, res) => {
     res.render('login');
   });
 
-  app.post(
-    '/login',
-    [
+  app.post('/usr/745/login', [
       body('username').notEmpty().withMessage('Username is required'),
       body('password').notEmpty().withMessage('Password is required'),
     ],
@@ -406,7 +404,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/tasks');
+          res.redirect('usr/745/');
         } else {
           res.send('Invalid username or password');
         }

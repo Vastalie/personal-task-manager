@@ -384,7 +384,7 @@ app.get('/registered-users', async (req, res) => {
   
 
   // Login Route
-  app.get('/usr/745/login', (req, res) => {
+  app.get('/login', (req, res) => {
     res.render('login');
   });
 
@@ -404,7 +404,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('usr/745/');
+          res.redirect('/usr/745/');
         } else {
           res.send('Invalid username or password');
         }

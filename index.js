@@ -202,7 +202,7 @@ app.get('/about', (req, res) => {
 // Route to render the form for adding a new task
 app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
-      return res.redirect('/usr/745/tasks/'); // Redirect to login if not logged in
+      return res.redirect('/login'); // Redirect to login if not logged in
   }
   res.render('new-task'); // Render the new task creation page
 });
@@ -243,7 +243,8 @@ app.get('/tasks', async (req, res) => {
 
 
  // Route to handle form submission for adding a new task
- app.post('/usr/745/tasks/new',
+ app.post(
+  '/tasks/new',
   requireLogin,
   [
     body('title').notEmpty().withMessage('Task title is required'),
@@ -271,7 +272,7 @@ app.get('/tasks', async (req, res) => {
         [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
       );
 
-      res.redirect('/usr/745/tasks');
+      res.redirect('/tasks');
     } catch (err) {
       console.error('Error adding task:', err);
       res.status(500).send('Error adding task');
@@ -284,7 +285,7 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
-      res.redirect('/usr/745/tasks'); // Redirect back to the tasks page
+      res.redirect('/tasks'); // Redirect back to the tasks page
   } catch (err) {
       console.error('Error marking task as completed:', err);
       res.status(500).send('Internal Server Error');
@@ -292,11 +293,11 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
 });
 
   // Mark task as pending
-  app.post('/usr/745/tasks/:id/pending', requireLogin, async (req, res) => {
+  app.post('/tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
-      res.redirect('/usr/745/tasks');
+      res.redirect('/tasks');
     } catch (err) {
       console.error('Error marking task as pending:', err);
       res.status(500).send('Error marking task as pending');
@@ -304,11 +305,11 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Delete a task
-  app.post('/usr/745/tasks/:id/delete', requireLogin, async (req, res) => {
+  app.post('/tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);
-      res.redirect('/usr/745/tasks');
+      res.redirect('/tasks');
     } catch (err) {
       console.error('Error deleting task:', err);
       res.status(500).send('Error deleting task');
@@ -392,14 +393,16 @@ app.get('/registered-users', async (req, res) => {
       }
     }
   );
-
+  
 
   // Login Route
   app.get('/login', (req, res) => {
     res.render('login');
   });
 
-  app.post('/usr/745/login', [
+  app.post(
+    '/login',
+    [
       body('username').notEmpty().withMessage('Username is required'),
       body('password').notEmpty().withMessage('Password is required'),
     ],
@@ -415,7 +418,7 @@ app.get('/registered-users', async (req, res) => {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/usr/745/');
+          res.redirect('/tasks');
         } else {
           res.send('Invalid username or password');
         }

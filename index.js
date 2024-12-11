@@ -125,7 +125,7 @@ app.get('/about', (req, res) => {
 });
 
 // Dashboard Route
-  app.get('/dashboard', requireLogin, async (req, res) => {
+  app.get('/usr/745//dashboard', requireLogin, async (req, res) => {
     try {
       const [metricsRow] = await db.query(`
         SELECT 

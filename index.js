@@ -12,8 +12,6 @@ const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
 const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
 
-
-
 const app = express();
 
 (async () => {
@@ -107,16 +105,6 @@ const spotifyApi = new SpotifyWebApi({
     }
   })();
 
-(async () => {
-    try {
-        const data = await spotifyApi.clientCredentialsGrant();
-        spotifyApi.setAccessToken(data.body['access_token']);
-        console.log('Spotify API connected');
-    } catch (err) {
-        console.error('Error connecting to Spotify API:', err);
-    }
-})();
-
 app.get('/about', (req, res) => {
   res.render('about');
 });
@@ -200,7 +188,7 @@ app.get('/about', (req, res) => {
   });
   
 // Route to render the form for adding a new task
-app.get('/tasks/new', (req, res) => {
+app.get('/tasks', (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
   }

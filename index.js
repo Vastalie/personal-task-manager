@@ -172,7 +172,6 @@ app.get('/dashboard', requireLogin, async (req, res) => {
   }
 });
 
-
   // Route for viewing all tasks
   app.get('/tasks', async (req, res) => {
     try {

@@ -280,11 +280,11 @@ app.get('/tasks', async (req, res) => {
 );
 
 //completed tasks
-app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
+app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
-      res.redirect('/usr/745/tasks'); // Redirect back to the tasks page
+      res.redirect('/tasks'); // Redirect back to the tasks page
   } catch (err) {
       console.error('Error marking task as completed:', err);
       res.status(500).send('Internal Server Error');
@@ -292,11 +292,11 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
 });
 
   // Mark task as pending
-  app.post('/usr/745/tasks/:id/pending', requireLogin, async (req, res) => {
+  app.post('/tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
-      res.redirect('/usr/745/tasks');
+      res.redirect('/tasks');
     } catch (err) {
       console.error('Error marking task as pending:', err);
       res.status(500).send('Error marking task as pending');
@@ -304,11 +304,11 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Delete a task
-  app.post('/usr/745/tasks/:id/delete', requireLogin, async (req, res) => {
+  app.post('/tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);
-      res.redirect('/usr/745/tasks');
+      res.redirect('/tasks');
     } catch (err) {
       console.error('Error deleting task:', err);
       res.status(500).send('Error deleting task');
@@ -359,7 +359,9 @@ app.get('/registered-users', async (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
   });
 
-  app.post('/usr/745/register',[
+  app.post(
+    '/register',
+    [
       body('username').notEmpty().withMessage('Username is required'),
       body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
       body('email').isEmail().withMessage('Invalid email address'),
@@ -390,6 +392,7 @@ app.get('/registered-users', async (req, res) => {
       }
     }
   );
+
 
   // Login Route
   app.get('/login', (req, res) => {
@@ -430,7 +433,7 @@ app.get('/registered-users', async (req, res) => {
         console.error('Error during logout:', err);
         return res.status(500).send('Error during logout');
       }
-      res.redirect('/usr/745/');
+      res.redirect('/tasks');
     });
   });
 

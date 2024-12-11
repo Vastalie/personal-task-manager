@@ -157,27 +157,39 @@ app.get('/about', (req, res) => {
   });
 
   // Route for viewing all tasks
-  app.get('/tasks', async (req, res) => {
+  app.get('/usr/745/tasks', async (req, res) => {
     try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(
         'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
       );
   
-      // If user is logged in, decrypt task descriptions
+      // Get the current date
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to midnight for date-only comparisons
+  
+      // Process tasks
       const formattedTasks = tasks.map((task) => {
-        if (req.session && req.session.user) {
-          return {
-            ...task,
-            decrypted_description: decrypt(task.encrypted_description, task.iv), // Decrypt for logged-in users
-            status: task.completed ? 'Completed' : 'Pending',
-          };
+        const dueDate = new Date(task.due_date);
+        let statusText;
+  
+        if (task.completed) {
+          statusText = 'Completed';
+        } else if (dueDate < today) {
+          statusText = 'Overdue';
+        } else if (dueDate.toDateString() === today.toDateString()) {
+          statusText = 'Due Today';
+        } else {
+          statusText = 'Pending';
         }
+  
         return {
           ...task,
-          status: task.completed ? 'Completed' : 'Pending',
+          decrypted_description: req.session && req.session.user ? decrypt(task.encrypted_description, task.iv) : null,
+          statusText,
+          due_date: dueDate.toLocaleDateString(), // Format the date for easier display
         };
-      });
+      });  
   
       // Render the tasks page with the tasks and user session
       res.render('tasks', { user: req.session.user, tasks: formattedTasks });

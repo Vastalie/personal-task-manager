@@ -1,7 +1,10 @@
+// Import the crypto module
 const crypto = require('crypto');
 
-const algorithm = 'aes-256-cbc'; // AES algorithm
-const ivLength = 16; // Initialization vector length
+// AES (advanced encryption standard) algorithm
+// Initialisation vector length
+const algorithm = 'aes-256-cbc'; 
+const ivLength = 16; 
 
 // Encrypt function
 const encrypt = (text) => {
@@ -21,6 +24,11 @@ const decrypt = (encryptedData, ivHex) => {
     return decrypted;
 };
 
+// Define a hardcoded 256-bit encryption key, log it for debugging, 
+//and export the encrypt and decrypt functions for use across application
 const key = Buffer.from('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef', 'hex');
 console.log('Using hardcoded key:', key.toString('hex'));
 module.exports = { encrypt, decrypt };
+
+
+

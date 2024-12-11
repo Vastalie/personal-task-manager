@@ -1,9 +1,11 @@
+// Load environment variables from .env file into process.env
 require('dotenv').config();
   
 //spotify console
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
 console.log('Client Secret:', process.env.SPOTIFY_CLIENT_SECRET);
 
+//import modules
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
@@ -14,9 +16,8 @@ const { body, validationResult } = require('express-validator');
 
 // Start server
 const PORT = 8000;
+// create express app
 const app = express();
-
-(async () => {
 
   // Create the database connection
   const db = await mysql.createConnection({
@@ -77,6 +78,16 @@ const app = express();
     }
 });
   
+// Import Spotify Web API module
+const SpotifyWebApi = require('spotify-web-api-node');
+
+// Set up Spotify API client
+const spotifyApi = new SpotifyWebApi({
+    clientId: process.env.SPOTIFY_CLIENT_ID,
+    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+});
+
+// Define route to fetch and render Spotify playlist data
   app.get('/spotify', async (req, res) => {
     try {
       const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
@@ -87,34 +98,21 @@ const app = express();
     }
   });  
 
-const SpotifyWebApi = require('spotify-web-api-node');
-
-const spotifyApi = new SpotifyWebApi({
-    clientId: process.env.SPOTIFY_CLIENT_ID,
-    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-});
-
-  // Get an access token
+  // Get an access token for the Spotify API using client credentials
   (async () => {
     try {
+       // Request an access token from Spotify's client credentials 
       const data = await spotifyApi.clientCredentialsGrant();
+      // Set the access token for API requests
       spotifyApi.setAccessToken(data.body['access_token']);
-      console.log('Spotify API connected');
+      console.log('Spotify API connected'); // Confirm successful connection
     } catch (err) {
+      // Handle errors during the token retrieval process
       console.error('Error connecting to Spotify API:', err);
     }
   })();
 
-(async () => {
-    try {
-        const data = await spotifyApi.clientCredentialsGrant();
-        spotifyApi.setAccessToken(data.body['access_token']);
-        console.log('Spotify API connected');
-    } catch (err) {
-        console.error('Error connecting to Spotify API:', err);
-    }
-})();
-
+  //about route
 app.get('/about', (req, res) => {
   res.render('about');
 });
@@ -171,6 +169,7 @@ app.get('/about', (req, res) => {
       );
       // If user is logged in, decrypt task descriptions
       const formattedTasks = tasks.map((task) => {
+
         if (req.session && req.session.user) {
           return {
             ...task,
@@ -194,7 +193,7 @@ app.get('/about', (req, res) => {
     }
   });
 
-// Route to render the form for adding a new task
+//route for adding a new task
 app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
@@ -202,6 +201,7 @@ app.get('/tasks/new', (req, res) => {
   res.render('new-task'); // Render the new task creation page
 });
 
+//route to display a list of tasks
 app.get('/tasks', async (req, res) => {
   try {
       // Fetch all tasks from the database
@@ -285,7 +285,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   }
 });
 
-  // Mark task as pending
+  //pending tasks
   app.post('/usr/745/tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
@@ -297,7 +297,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
     }
   });
 
-  // Delete a task
+  // Deleted tasks
   app.post('/usr/745/tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
@@ -309,7 +309,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
     }
   });
 
-  // Search Tasks
+  // Search tasks
   app.get('/search', requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
     try {
@@ -416,8 +416,9 @@ app.get('/registered-users', async (req, res) => {
       res.redirect('/usr/745/');
     });
   });
-  
+
   // Start the server
+  (async () => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });

@@ -1,5 +1,6 @@
 require('dotenv').config();
-  //spotify console
+  
+//spotify console
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
 console.log('Client Secret:', process.env.SPOTIFY_CLIENT_SECRET);
 
@@ -11,20 +12,19 @@ const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
 
-
-
+// Start server
+const PORT = 8000;
 const app = express();
 
 (async () => {
-  
+
   // Create the database connection
   const db = await mysql.createConnection({
     host: 'localhost',
     user: 'admin',
-    password: 'Shaina071199', // Replace with your actual password
+    password: 'Shaina071199', 
     database: 'personal_task_manager',
   });
-
   try {
     console.log('Connected to Database');
   } catch (error) {
@@ -51,7 +51,7 @@ const app = express();
   // Middleware to parse form data
   app.use(express.urlencoded({ extended: true }));
 
-  // Middleware to make `taskManagerData` available globally in all views
+  // Middleware to make `taskManagerData` available  in all views
   app.use((req, res, next) => {
     res.locals.taskManagerData = { appName: "Personal Task Manager" };
     next();
@@ -65,11 +65,11 @@ const app = express();
     next();
   }
 
-  // Root route (Task Manager page)
+  // Root route for home page
   app.get('/', async (req, res) => {
     try {
         // Fetch the playlist using Spotify API
-        const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46'); // Replace with your playlist ID
+        const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46'); 
         res.render('index', { playlist: playlistData.body });
     } catch (err) {
         console.error('Error fetching Spotify playlist:', err);
@@ -79,7 +79,6 @@ const app = express();
   
   app.get('/spotify', async (req, res) => {
     try {
-      // Replace '4mIRypXv49j37pEJNuaZ46' with your actual playlist ID
       const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
       res.render('spotify', { playlist: playlistData.body });
     } catch (err) {
@@ -88,14 +87,13 @@ const app = express();
     }
   });  
 
-  const SpotifyWebApi = require('spotify-web-api-node');
+const SpotifyWebApi = require('spotify-web-api-node');
 
 const spotifyApi = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 });
 
- 
   // Get an access token
   (async () => {
     try {
@@ -121,7 +119,7 @@ app.get('/about', (req, res) => {
   res.render('about');
 });
 
-  // Dashboard Route
+// Dashboard Route
   app.get('/dashboard', requireLogin, async (req, res) => {
     try {
       const [metricsRow] = await db.query(`
@@ -132,9 +130,7 @@ app.get('/about', (req, res) => {
           SUM(completed = 0 AND due_date < CURDATE()) AS overdue_tasks
         FROM tasks
       `);
-
       const metrics = metricsRow[0];
-
       const [monthlyRows] = await db.query(`
         SELECT 
           m.month AS month, 
@@ -155,12 +151,10 @@ app.get('/about', (req, res) => {
         ON m.month = t.month
         ORDER BY m.month;
       `);
-
       const monthlyData = Array(12).fill(0);
       monthlyRows.forEach(row => {
         monthlyData[row.month - 1] = row.task_count;
       });
-
       res.render('dashboard', { metrics, monthlyData });
     } catch (err) {
       console.error('Error loading dashboard:', err);
@@ -175,22 +169,23 @@ app.get('/about', (req, res) => {
       const [tasks] = await db.query(
         'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
       );
-  
       // If user is logged in, decrypt task descriptions
       const formattedTasks = tasks.map((task) => {
         if (req.session && req.session.user) {
           return {
             ...task,
+          // Decrypt the encrypted_description field using the decrypt function for logged-in users
             decrypted_description: decrypt(task.encrypted_description, task.iv), // Decrypt for logged-in users
             status: task.completed ? 'Completed' : 'Pending',
           };
         }
+          // If the user is not logged in, display encrypted tasks
         return {
           ...task,
           status: task.completed ? 'Completed' : 'Pending',
         };
       });
-  
+
       // Render the tasks page with the tasks and user session
       res.render('tasks', { user: req.session.user, tasks: formattedTasks });
     } catch (err) {
@@ -198,7 +193,7 @@ app.get('/about', (req, res) => {
       res.status(500).send('Internal Server Error');
     }
   });
-  
+
 // Route to render the form for adding a new task
 app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
@@ -213,7 +208,6 @@ app.get('/tasks', async (req, res) => {
       const [tasks] = await db.query(
           'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
       );
-
       // Process tasks
       const formattedTasks = tasks.map((task) => {
         try {
@@ -241,7 +235,6 @@ app.get('/tasks', async (req, res) => {
           };
         }
       });
-
       // Render the tasks page
       res.render('tasks', { user: req.session.user, tasks: formattedTasks });
   } catch (err) {
@@ -249,7 +242,6 @@ app.get('/tasks', async (req, res) => {
       res.status(500).send('Internal Server Error');
   }
 });
-
 
  // Route to handle form submission for adding a new task
  app.post('/usr/745/tasks/new', requireLogin,[
@@ -259,25 +251,20 @@ app.get('/tasks', async (req, res) => {
     body('priority')
       .optional()
       .isIn(['Low', 'Medium', 'High'])
-      .withMessage('Priority must be Low, Medium, or High'),
-  ],
+      .withMessage('Priority must be Low, Medium, or High'), ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-
     const { title, description, due_date, priority } = req.body;
     const user_id = req.session.user.id;
-
     try {
       const { encryptedData, iv } = encrypt(description);
-
       await db.query(
         'INSERT INTO tasks (title, encrypted_description, iv, due_date, completed, priority, user_id) VALUES (?, ?, ?, ?, 0, ?, ?)',
         [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
       );
-
       res.redirect('/usr/745/tasks');
     } catch (err) {
       console.error('Error adding task:', err);
@@ -325,11 +312,9 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   // Search Tasks
   app.get('/search', requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
-
     try {
         // Fetch all tasks
         const [tasks] = await db.query('SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks');
-
         // Decrypt and filter tasks by the search query
         const results = tasks
             .map(task => ({
@@ -340,14 +325,12 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
                 task.decrypted_description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 task.title.toLowerCase().includes(searchQuery.toLowerCase())
             );
-
         res.render('search-results', { results, searchQuery });
     } catch (err) {
         console.error('Error performing search:', err);
         res.status(500).send('Error performing search');
     }
 });
-
 
 // Route to fetch and display registered users
 app.get('/registered-users', async (req, res) => {
@@ -378,9 +361,7 @@ app.get('/registered-users', async (req, res) => {
           registrationSuccess: false,
         });
       }
-  
       const { username, password, email } = req.body;
-  
       try {
         const hashedPassword = bcrypt.hashSync(password, 10);
         await db.query('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [
@@ -388,7 +369,6 @@ app.get('/registered-users', async (req, res) => {
           hashedPassword,
           email,
         ]);
-  
         res.render('register', { errorMessage: null, registrationSuccess: true });
       } catch (err) {
         console.error('Error during registration:', err);
@@ -401,19 +381,16 @@ app.get('/registered-users', async (req, res) => {
   app.get('/login', (req, res) => {
     res.render('login');
   });
-  
+
   app.post('/usr/745/login',[
       body('username').notEmpty().withMessage('Username is required'),
-      body('password').notEmpty().withMessage('Password is required'),
-    ],
+      body('password').notEmpty().withMessage('Password is required'), ],
     async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).send(errors.array().map(err => err.msg).join(', '));
       }
-  
       const { username, password } = req.body;
-  
       try {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
@@ -439,9 +416,7 @@ app.get('/registered-users', async (req, res) => {
       res.redirect('/usr/745/');
     });
   });
-
-  // Start the server
-  const PORT = 8000;
+  
   // Start the server
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

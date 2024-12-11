@@ -6,7 +6,6 @@
 </head>
 <body>
     <h1>Register for <%= taskManagerData.appName %></h1>
-    
     <% if (registrationSuccess) { %>
         <p>Registration successful! Redirecting to the login page...</p>
         <script>
@@ -17,17 +16,13 @@
     <% } else if (errorMessage) { %>
         <p style="color: red;"><%= errorMessage %></p>
     <% } %>
-    
     <form action="/usr/745/register" method="POST">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
-        
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
-        
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
-        
         <button type="submit">Register</button>
     </form>
 </body>

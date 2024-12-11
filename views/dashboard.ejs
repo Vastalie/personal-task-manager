@@ -68,9 +68,7 @@
         <h1 style="color: #80d0c7;">Dashboard</h1>
         <!-- Add the Theme Toggle Button Here -->
         <button id="theme-toggle" style="padding: 10px; cursor: pointer;">Switch Theme
-            <span id="theme-icon">🌙</span> Switch to Light Mode
         </button>
-
     </header>
     <!-- Dashboard Data -->
     <div class="dashboard" 
@@ -142,7 +140,6 @@
                 console.log("Dashboard Metrics:", { totalTasks, completedTasks, pendingTasks, overdueTasks });
                 console.log("Monthly Data:", monthlyData);
 
-
                 // Monthly tasks bar chart
                 const monthlyTasksCtx = document.getElementById('monthlyTasksChart').getContext('2d');
 new Chart(monthlyTasksCtx, {
@@ -179,7 +176,6 @@ new Chart(monthlyTasksCtx, {
         }
     }
 });
-
                 // Task status pie chart
                 const taskStatusCtx = document.getElementById('taskStatusChart').getContext('2d');
                 new Chart(taskStatusCtx, {
@@ -217,7 +213,6 @@ new Chart(monthlyTasksCtx, {
         localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
 
         // Update the button text and icon dynamically
-        themeIcon.innerText = isLightMode ? '☀️' : '🌙';
         themeToggleButton.innerText = isLightMode ? 'Switch to Dark Mode' : 'Switch to Light Mode';
     });
 
@@ -240,7 +235,7 @@ new Chart(monthlyTasksCtx, {
     });
 });
 
-// Ensure legend colours match saved theme on page load
+// colours match saved theme on page load
 window.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
@@ -250,7 +245,6 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
 </script>
 </body>
 </html>

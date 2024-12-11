@@ -12,7 +12,6 @@
         <input type="text" name="q" placeholder="Enter search term..." value="<%= searchQuery %>">
         <button type="submit">Search</button>
     </form>
-    
     <% if (results.length > 0) { %>
         <h2>Results for "<%= searchQuery %>":</h2>
         <ul>
@@ -27,7 +26,6 @@
     <% } else { %>
         <p>Enter a term to search tasks.</p>
     <% } %>
-
     <p><a href="/tasks/new">Add a New Task</a></p>
     <p><a href="/">Back to Home</a></p>
 </body>

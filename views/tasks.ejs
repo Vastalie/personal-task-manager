@@ -7,13 +7,11 @@
 </head>
 <body>
     <h1>Task List</h1>
-
     <ul>
         <% tasks.forEach((task) => {
             const dueDate = new Date(task.due_date);
             const now = new Date();
             let statusText;
-
             if (task.completed) {
                 statusText = "Completed";
             } else if (dueDate && now > dueDate) {
@@ -30,7 +28,6 @@
                 <% } else { %>
                     <strong>Description (Encrypted):</strong> <%= task.encrypted_description %><br>
                 <% } %>
-                
                 <strong>Due Date:</strong> <%= dueDate.toLocaleDateString() %> [<%= statusText %>]
 
                 <% if (user) { %>
@@ -47,7 +44,6 @@
             </li>
         <% }); %>
     </ul>
-
     <% if (user) { %>
         <a href="/tasks/new">Add a New Task</a>
         <br><br>

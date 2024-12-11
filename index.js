@@ -168,7 +168,7 @@ app.get('/about', (req, res) => {
   });
 
   // Route for viewing all tasks
-  app.get('/usr/745/tasks', async (req, res) => {
+  app.get('/tasks', async (req, res) => {
     try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(

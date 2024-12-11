@@ -243,7 +243,7 @@ app.get('/usr/745/tasks', async (req, res) => {
         }
       });
       // Render the tasks page
-      res.render('tasks', { user: req.session.user, tasks: formattedTasks });
+      res.render('/usr/745/tasks', { user: req.session.user, tasks: formattedTasks });
   } catch (err) {
       console.error('Error loading tasks:', err);
       res.status(500).send('Internal Server Error');

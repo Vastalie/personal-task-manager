@@ -201,7 +201,7 @@ app.get('/about', (req, res) => {
   });
 
 //route for adding a new task
-app.get('/usr/745/tasks/new', (req, res) => {
+app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
   }

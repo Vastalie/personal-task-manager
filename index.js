@@ -280,11 +280,11 @@ app.get('/tasks', async (req, res) => {
 );
 
 //completed tasks
-app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
+app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   try {
       const { id } = req.params; // Get task ID from the route parameter
       await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]); // Update the task in the database
-      res.redirect('/tasks'); // Redirect back to the tasks page
+      res.redirect('/usr/745/tasks'); // Redirect back to the tasks page
   } catch (err) {
       console.error('Error marking task as completed:', err);
       res.status(500).send('Internal Server Error');
@@ -292,11 +292,11 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
 });
 
   // Mark task as pending
-  app.post('/tasks/:id/pending', requireLogin, async (req, res) => {
+  app.post('/usr/745/tasks/:id/pending', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
-      res.redirect('/tasks');
+      res.redirect('/usr/745/tasks');
     } catch (err) {
       console.error('Error marking task as pending:', err);
       res.status(500).send('Error marking task as pending');
@@ -304,11 +304,11 @@ app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Delete a task
-  app.post('/tasks/:id/delete', requireLogin, async (req, res) => {
+  app.post('/usr/745/tasks/:id/delete', requireLogin, async (req, res) => {
     try {
       const { id } = req.params;
       await db.query('DELETE FROM tasks WHERE id = ?', [id]);
-      res.redirect('/tasks');
+      res.redirect('/usr/745/tasks');
     } catch (err) {
       console.error('Error deleting task:', err);
       res.status(500).send('Error deleting task');
@@ -392,7 +392,6 @@ app.get('/registered-users', async (req, res) => {
       }
     }
   );
-  
 
   // Login Route
   app.get('/login', (req, res) => {

@@ -168,7 +168,7 @@ app.get('/about', (req, res) => {
   });
 
   // Route for viewing all tasks
-  app.get('/tasks', async (req, res) => {
+  app.get('/usr/745/tasks', async (req, res) => {
     try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(
@@ -201,7 +201,7 @@ app.get('/about', (req, res) => {
   });
 
 //route for adding a new task
-app.get('/tasks/new', (req, res) => {
+app.get('/usr/745/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
   }
@@ -209,7 +209,7 @@ app.get('/tasks/new', (req, res) => {
 });
 
 //route to display a list of tasks
-app.get('/tasks', async (req, res) => {
+app.get('/usr/745/tasks', async (req, res) => {
   try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(
@@ -317,7 +317,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Search tasks
-  app.get('/search', requireLogin, async (req, res) => {
+  app.get('/usr/745/search', requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
     try {
         // Fetch all tasks

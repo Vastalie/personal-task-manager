@@ -317,7 +317,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Search tasks
-  app.get('/usr/745/search-results', requireLogin, async (req, res) => {
+  app.get('/search-results', requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
     try {
         // Fetch all tasks

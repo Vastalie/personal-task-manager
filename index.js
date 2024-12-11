@@ -202,12 +202,12 @@ app.get('/about', (req, res) => {
 // Route to render the form for adding a new task
 app.get('/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
-      return res.redirect('/login'); // Redirect to login if not logged in
+      return res.redirect('/usr/745/tasks'); // Redirect to login if not logged in
   }
   res.render('new-task'); // Render the new task creation page
 });
 
-app.get('/usr/745/tasks', async (req, res) => {
+app.get('/tasks', async (req, res) => {
   try {
       // Fetch all tasks from the database
       const [tasks] = await db.query(

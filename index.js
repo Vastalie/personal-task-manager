@@ -201,7 +201,7 @@ app.get('/about', (req, res) => {
   });
 
 //route for adding a new task
-app.get('/tasks/new', (req, res) => {
+app.get('/usr/745/tasks/new', (req, res) => {
   if (!req.session || !req.session.user) {
       return res.redirect('/login'); // Redirect to login if not logged in
   }
@@ -243,7 +243,7 @@ app.get('/usr/745/tasks', async (req, res) => {
         }
       });
       // Render the tasks page
-      res.render('/usr/745/tasks', { user: req.session.user, tasks: formattedTasks });
+      res.render('/tasks', { user: req.session.user, tasks: formattedTasks });
   } catch (err) {
       console.error('Error loading tasks:', err);
       res.status(500).send('Internal Server Error');
@@ -385,7 +385,7 @@ app.get('/registered-users', async (req, res) => {
   );
 
   // Login Route
-  app.get('/login', (req, res) => {
+  app.get('/usr/745/login', (req, res) => {
     res.render('login');
   });
 
@@ -414,7 +414,7 @@ app.get('/registered-users', async (req, res) => {
   );  
 
   // Logout Route
-  app.get('/logout', (req, res) => {
+  app.get('/usr/745/logout', (req, res) => {
     req.session.destroy(err => {
       if (err) {
         console.error('Error during logout:', err);

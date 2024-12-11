@@ -68,7 +68,7 @@ async function initialiseDatabase() {
   // Middleware to check if the user is logged in
   function requireLogin(req, res, next) {
     if (!req.session.user) {
-      return res.redirect('/usr/745/login');
+      return res.redirect('/login');
     }
     next();
   }

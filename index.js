@@ -317,7 +317,7 @@ app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
   });
 
   // Search tasks
-  app.get('/usr/745/search', requireLogin, async (req, res) => {
+  app.get('/usr/745/search-results', requireLogin, async (req, res) => {
     const searchQuery = req.query.q || '';
     try {
         // Fetch all tasks
@@ -385,11 +385,11 @@ app.get('/registered-users', async (req, res) => {
   );
 
   // Login Route
-  app.get('/usr/745/login', (req, res) => {
+  app.get('/login', (req, res) => {
     res.render('login');
   });
 
-  app.post('/usr/745/login',[
+  app.post('/login',[
       body('username').notEmpty().withMessage('Username is required'),
       body('password').notEmpty().withMessage('Password is required'), ],
     async (req, res) => {

@@ -19,19 +19,27 @@ const PORT = 8000;
 // create express app
 const app = express();
 
-  // Create the database connection
-  const db = await mysql.createConnection({
-    host: 'localhost',
-    user: 'admin',
-    password: 'Shaina071199', 
-    database: 'personal_task_manager',
-  });
+initialiseDatabase(); // Call this to establish the connection before handling any requests
+
+// Create the database connection
+let db;
+
+async function initialiseDatabase() {
   try {
+    // Initialise the database connection and assign it to the outer variable
+    db = await mysql.createConnection({
+      host: 'localhost',
+      user: 'admin',
+      password: 'Shaina071199',
+      database: 'personal_task_manager',
+    });
     console.log('Connected to Database');
   } catch (error) {
     console.error('Error connecting to MySQL:', error);
-    return;
+    process.exit(1); // Exit if the database connection fails
   }
+}
+
 
   // Set EJS as the templating engine and set the views directory
   app.set('view engine', 'ejs');

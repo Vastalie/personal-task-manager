@@ -399,9 +399,7 @@ app.get('/registered-users', async (req, res) => {
     res.render('login');
   });
 
-  app.post(
-    '/login',
-    [
+  app.post('/usr/745/login', [
       body('username').notEmpty().withMessage('Username is required'),
       body('password').notEmpty().withMessage('Password is required'),
     ],

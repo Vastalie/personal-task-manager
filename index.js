@@ -359,9 +359,7 @@ app.get('/registered-users', async (req, res) => {
     res.render('register', { errorMessage: null, registrationSuccess: false });
   });
 
-  app.post(
-    '/register',
-    [
+  app.post('/usr/745/register',[
       body('username').notEmpty().withMessage('Username is required'),
       body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
       body('email').isEmail().withMessage('Invalid email address'),

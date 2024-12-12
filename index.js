@@ -237,7 +237,7 @@ async function initialiseApp() {
           [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
         );
 
-        res.redirect('/usr/745/tasks');
+        res.redirect('/usr/745/login');
       } catch (err) {
         console.error('Error adding task:', err);
         res.status(500).send('Error adding task');

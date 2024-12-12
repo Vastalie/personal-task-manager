@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './path/to/.env' });
+require('dotenv').config({ path: './.env' });
 
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
 console.log('Client Secret:', process.env.SPOTIFY_CLIENT_SECRET);

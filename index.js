@@ -65,7 +65,7 @@ async function initialiseApp() {
     // Middleware to check if user is logged in
     function requireLogin(req, res, next) {
       if (!req.session.user) {
-        return res.redirect('/login');
+        return res.redirect('/usr/745/login');
       }
       next();
     }
@@ -98,7 +98,7 @@ async function initialiseApp() {
     });
 
     // Dashboard route
-    app.get('/usr/745/dashboard', requireLogin, async (req, res) => {
+    app.get('/dashboard', requireLogin, async (req, res) => {
       try {
         const [metricsRow] = await db.query(`
           SELECT 
@@ -145,7 +145,7 @@ async function initialiseApp() {
     });
 
     // Tasks routes
-    app.get('/tasks', async (req, res) => {
+    app.get('/usr/745/tasks', async (req, res) => {
       try {
         const [tasks] = await db.query(
           'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
@@ -277,7 +277,7 @@ async function initialiseApp() {
     });
 
     // Search route
-    app.get('/usr/745/search', requireLogin, async (req, res) => {
+    app.get('/search', requireLogin, async (req, res) => {
       const searchQuery = req.query.q || '';
 
       try {

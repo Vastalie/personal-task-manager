@@ -237,7 +237,7 @@ async function initialiseApp() {
           [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
         );
 
-        res.redirect('/usr/745/login');
+        res.redirect('/usr/745/tasks');
       } catch (err) {
         console.error('Error adding task:', err);
         res.status(500).send('Error adding task');
@@ -368,7 +368,7 @@ async function initialiseApp() {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/usr/745/');
+          res.redirect('/usr/745/login');
         } else {
           res.send('Invalid username or password');
         }

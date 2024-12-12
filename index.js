@@ -1,8 +1,9 @@
 require('dotenv').config();
 
 //spotify console
-console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
-console.log('Client Secret:', process.env.SPOTIFY_CLIENT_SECRET);
+console.log('SPOTIFY_CLIENT_ID:', process.env.SPOTIFY_CLIENT_ID);
+console.log('SPOTIFY_CLIENT_SECRET:', process.env.SPOTIFY_CLIENT_SECRET);
+
 
 const express = require('express');
 const bcrypt = require('bcryptjs');

@@ -38,12 +38,12 @@ console.log('SPOTIFY_CLIENT_SECRET:', process.env.SPOTIFY_CLIENT_SECRET);
 const spotifyApi = new SpotifyWebApi({
   clientId: process.env.SPOTIFY_CLIENT_ID,
   clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-  redirectUri: 'http://localhost:8000/callback',
+  redirectUri: 'https://www.doc.gold.ac.uk/usr/745/callback',
 });
 
     // Log Spotify credentials status
     console.log('Checking Spotify credentials:', {
-      hasClientId: !!process.env.SPOTIFY_CLIENT_ID,
+      hasClientId:'982fe0781e144e65a57ce7506d00b0e1' ,
       hasClientSecret: !!process.env.SPOTIFY_CLIENT_SECRET
     });
 

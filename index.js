@@ -432,3 +432,5 @@ app.get('/registered-users', async (req, res) => {
   console.error('Error initialising app:', error);
 }
 }
+
+initialiseApp();

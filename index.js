@@ -1,4 +1,3 @@
-Code works: 
 require('dotenv').config();
   //spotify console
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);

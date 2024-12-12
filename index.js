@@ -105,7 +105,7 @@ const spotifyApi = new SpotifyWebApi({
     });
 
     // Spotify route
-    app.get('/spotify', async (req, res) => {
+    app.get('/urs/745/spotify', async (req, res) => {
       try {
         const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
         res.render('spotify', { playlist: playlistData.body });

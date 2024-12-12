@@ -10,24 +10,26 @@ const session = require('express-session');
 const path = require('path');
 const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
-const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
+const SpotifyWebApi = require('spotify-web-api-node');
 
+const baseUrl = '/usr/745'; 
 const app = express();
 
-  // Create the database connection
-  const db = await mysql.createConnection({
-    host: 'localhost',
-    user: 'admin',
-    password: 'Shaina071199', // Replace with your actual password
-    database: 'personal_task_manager',
-  });
-
+async function initialiseApp() {
   try {
+    // Create the database connection
+    const db = await mysql.createConnection({
+      host: 'localhost',
+      user: 'admin',
+      password: 'Shaina071199', // Replace with your actual password
+      database: 'personal_task_manager',
+    });
+
     console.log('Connected to Database');
   } catch (error) {
-    console.error('Error connecting to MySQL:', error);
-    return;
+    console.error('Error connecting to database:', error);
   }
+}
 
   // Set EJS as the templating engine and set the views directory
   app.set('view engine', 'ejs');
@@ -74,24 +76,19 @@ const app = express();
     }
 });
   
-  app.get('/spotify', async (req, res) => {
-    try {
-      // Replace '4mIRypXv49j37pEJNuaZ46' with your actual playlist ID
-      const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
-      res.render('spotify', { playlist: playlistData.body });
-    } catch (err) {
-      console.error('Error fetching Spotify data:', err);
-      res.render('spotify', { playlist: null });
-    }
-  });  
-
-  const SpotifyWebApi = require('spotify-web-api-node');
-
+ // Initialise Spotify API
 const spotifyApi = new SpotifyWebApi({
-    clientId: process.env.SPOTIFY_CLIENT_ID,
-    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+  clientId: process.env.SPOTIFY_CLIENT_ID,
+  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 });
 
+try {
+  const data = await spotifyApi.clientCredentialsGrant();
+  spotifyApi.setAccessToken(data.body['access_token']);
+  console.log('Spotify API connected');
+} catch (err) {
+  console.error('Error connecting to Spotify API:', err);
+}
  
   // Get an access token
   (async () => {

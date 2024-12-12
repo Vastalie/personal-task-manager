@@ -1,6 +1,6 @@
 require('dotenv').config();
+console.log('Environment Check:');
 
-//spotify console
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
 console.log('Client Secret:', process.env.SPOTIFY_CLIENT_SECRET);
 
@@ -16,13 +16,8 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const baseUrl = '/usr/745';
 const app = express();
 
-// Initialize Spotify API
-const spotifyApi = new SpotifyWebApi({
-    clientId: process.env.SPOTIFY_CLIENT_ID,
-    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-});
 
-// Main initialization function
+// Main initialisation function
 async function initialiseApp() {
   try {
     // Create the database connection
@@ -35,13 +30,41 @@ async function initialiseApp() {
 
     console.log('Connected to Database');
 
-    // Initialize Spotify
+    // Initialise Spotify API
+const spotifyApi = new SpotifyWebApi({
+  clientId: process.env.SPOTIFY_CLIENT_ID,
+  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+});
+
+    // Log Spotify credentials status
+    console.log('Checking Spotify credentials:', {
+      hasClientId: !!process.env.SPOTIFY_CLIENT_ID,
+      hasClientSecret: !!process.env.SPOTIFY_CLIENT_SECRET
+    });
+
+    // Initialise Spotify
     try {
       const data = await spotifyApi.clientCredentialsGrant();
       spotifyApi.setAccessToken(data.body['access_token']);
       console.log('Spotify API connected');
-    } catch (err) {
-      console.error('Error connecting to Spotify API:', err);
+      console.error('Spotify API connected successfully');
+    
+       // Set up token refresh
+       setInterval(async () => {
+        try {
+          const newData = await spotifyApi.clientCredentialsGrant();
+          spotifyApi.setAccessToken(newData.body['access_token']);
+          console.log('Spotify token refreshed');
+        } catch (refreshError) {
+          console.error('Error refreshing Spotify token:', refreshError);
+        }
+      }, 3600000); // Refresh every hour
+    } catch (spotifyError) {
+      console.error('Detailed Spotify Error:', {
+        message: spotifyError.message,
+        statusCode: spotifyError?.statusCode,
+        body: spotifyError?.body
+      });
     }
 
     // Set up Express configuration

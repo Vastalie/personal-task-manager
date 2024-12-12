@@ -94,7 +94,7 @@ const spotifyApi = new SpotifyWebApi({
     }
 
     // Root route with Spotify integration
-    app.get('/', async (req, res) => {
+    app.get('/usr/745/', async (req, res) => {
       try {
         const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
         res.render('index', { playlist: playlistData.body });
@@ -105,7 +105,7 @@ const spotifyApi = new SpotifyWebApi({
     });
 
     // Spotify route
-    app.get('/urs/745/spotify', async (req, res) => {
+    app.get('/spotify', async (req, res) => {
       try {
         const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
         res.render('spotify', { playlist: playlistData.body });

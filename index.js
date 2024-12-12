@@ -37,7 +37,6 @@ console.log('SPOTIFY_CLIENT_SECRET:', process.env.SPOTIFY_CLIENT_SECRET);
 const spotifyApi = new SpotifyWebApi({
   clientId: process.env.SPOTIFY_CLIENT_ID,
   clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-  redirectUri: 'https://www.doc.gold.ac.uk/usr/745/callback',
 });
 
     // Log Spotify credentials status

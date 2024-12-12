@@ -26,10 +26,7 @@ async function initialiseApp() {
     });
 
     console.log('Connected to Database');
-  } catch (error) {
-    console.error('Error connecting to database:', error);
-  }
-}
+ 
 
   // Set EJS as the templating engine and set the views directory
   app.set('view engine', 'ejs');
@@ -431,3 +428,7 @@ app.get('/registered-users', async (req, res) => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 })();
+} catch (error) {
+  console.error('Error initialising app:', error);
+}
+}

@@ -14,7 +14,6 @@ const baseUrl = '/usr/745'; // Adjust this if the base URL changes in the future
 
 const app = express();
 
-(async () => {
   // Create the database connection
   const db = await mysql.createConnection({
     host: 'localhost',
@@ -430,6 +429,7 @@ app.get('/registered-users', async (req, res) => {
   // Start the server
   const PORT = 8000;
   // Start the server
+  (async () => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });

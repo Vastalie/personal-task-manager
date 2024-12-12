@@ -100,17 +100,19 @@ async function initialiseApp() {
     // Dashboard route
     app.get('/dashboard', requireLogin, async (req, res) => {
       try {
+        // Updated metrics query to correctly handle overdue tasks
         const [metricsRow] = await db.query(`
           SELECT 
             COUNT(*) AS total_tasks,
             SUM(completed = 1) AS completed_tasks,
-            SUM(completed = 0 AND due_date >= CURDATE()) AS pending_tasks,
-            SUM(completed = 0 AND due_date < CURDATE()) AS overdue_tasks
+            SUM(completed = 0 AND due_date > CURDATE()) AS pending_tasks,
+            SUM(completed = 0 AND due_date <= CURDATE()) AS overdue_tasks
           FROM tasks
         `);
-
+    
         const metrics = metricsRow[0];
-
+    
+        // Monthly data query remains the same
         const [monthlyRows] = await db.query(`
           SELECT 
             m.month AS month, 
@@ -131,12 +133,12 @@ async function initialiseApp() {
           ON m.month = t.month
           ORDER BY m.month;
         `);
-
+    
         const monthlyData = Array(12).fill(0);
         monthlyRows.forEach(row => {
           monthlyData[row.month - 1] = row.task_count;
         });
-
+    
         res.render('dashboard', { metrics, monthlyData });
       } catch (err) {
         console.error('Error loading dashboard:', err.message);

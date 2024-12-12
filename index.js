@@ -23,6 +23,7 @@ async function initialiseApp() {
     const db = await mysql.createConnection({
       host: 'localhost',
       user: 'admin',
+    
       password: 'Shaina071199',
       database: 'personal_task_manager',
     });

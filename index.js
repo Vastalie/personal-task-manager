@@ -145,7 +145,7 @@ async function initialiseApp() {
     });
 
     // Tasks routes
-    app.get('/usr/745/tasks', async (req, res) => {
+    app.get('/tasks', async (req, res) => {
       try {
         const [tasks] = await db.query(
           'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'

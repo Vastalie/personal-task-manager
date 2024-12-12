@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: './path/to/.env' });
 
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
 console.log('Client Secret:', process.env.SPOTIFY_CLIENT_SECRET);
@@ -27,7 +27,7 @@ async function initialiseApp() {
       password: 'Shaina071199',
       database: 'personal_task_manager',
     });
-    
+
 
     console.log('Connected to Database');
 

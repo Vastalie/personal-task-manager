@@ -109,7 +109,7 @@ app.get('/about', (req, res) => {
   res.render('about');
 });
 
-  // Dashboard Route
+
  // Dashboard Route
 app.get('/dashboard', requireLogin, async (req, res) => {
   try {
@@ -122,12 +122,6 @@ app.get('/dashboard', requireLogin, async (req, res) => {
               SUM(completed = 0 AND due_date < CURDATE()) AS overdue_tasks
           FROM tasks
       `);
-
-      // Check if metricsRow exists and contains data
-      if (!metricsRow || metricsRow.length === 0) {
-          console.error('Metrics row is empty or undefined');
-          return res.status(500).send('No metrics data available');
-      }
 
       const metrics = metricsRow[0];
 
@@ -159,15 +153,10 @@ app.get('/dashboard', requireLogin, async (req, res) => {
           monthlyData[row.month - 1] = row.task_count;
       });
 
-      // Log the metrics and monthly data for debugging
-      console.log('Metrics:', metrics);
-      console.log('Monthly Data:', monthlyData);
-
       // Render the dashboard page with metrics and monthly data
       res.render('dashboard', { metrics, monthlyData });
   } catch (err) {
       console.error('Error loading dashboard:', err.message);
-      console.error(err.stack);
       res.status(500).send('Internal Server Error');
   }
 });
@@ -180,32 +169,20 @@ app.get('/dashboard', requireLogin, async (req, res) => {
         'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
       );
   
-      // Get the current date
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalize to midnight for date-only comparisons
-  
-      // Process tasks
+      // If user is logged in, decrypt task descriptions
       const formattedTasks = tasks.map((task) => {
-        const dueDate = new Date(task.due_date);
-        let statusText;
-  
-        if (task.completed) {
-          statusText = 'Completed';
-        } else if (dueDate < today) {
-          statusText = 'Overdue';
-        } else if (dueDate.toDateString() === today.toDateString()) {
-          statusText = 'Due Today';
-        } else {
-          statusText = 'Pending';
+        if (req.session && req.session.user) {
+          return {
+            ...task,
+            decrypted_description: decrypt(task.encrypted_description, task.iv), // Decrypt for logged-in users
+            status: task.completed ? 'Completed' : 'Pending',
+          };
         }
-  
         return {
           ...task,
-          decrypted_description: req.session && req.session.user ? decrypt(task.encrypted_description, task.iv) : null,
-          statusText,
-          due_date: dueDate.toLocaleDateString(), // Format the date for easier display
+          status: task.completed ? 'Completed' : 'Pending',
         };
-      });  
+      });
   
       // Render the tasks page with the tasks and user session
       res.render('tasks', { user: req.session.user, tasks: formattedTasks });
@@ -214,6 +191,7 @@ app.get('/dashboard', requireLogin, async (req, res) => {
       res.status(500).send('Internal Server Error');
     }
   });
+  
   
 // Route to render the form for adding a new task
 app.get('/tasks/new', (req, res) => {

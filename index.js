@@ -27,6 +27,7 @@ async function initialiseApp() {
       password: 'Shaina071199',
       database: 'personal_task_manager',
     });
+    
 
     console.log('Connected to Database');
 

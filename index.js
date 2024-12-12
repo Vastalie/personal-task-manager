@@ -86,17 +86,6 @@ try {
 } catch (err) {
   console.error('Error connecting to Spotify API:', err);
 }
- 
-  // Get an access token
-  (async () => {
-    try {
-      const data = await spotifyApi.clientCredentialsGrant();
-      spotifyApi.setAccessToken(data.body['access_token']);
-      console.log('Spotify API connected');
-    } catch (err) {
-      console.error('Error connecting to Spotify API:', err);
-    }
-  })();
 
 app.get('/about', (req, res) => {
   res.render('about');

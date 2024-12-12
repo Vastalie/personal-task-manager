@@ -1,5 +1,4 @@
 require('dotenv').config();
-console.log('Environment Check:');
 
 console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID);
 console.log('Client Secret:', process.env.SPOTIFY_CLIENT_SECRET);
@@ -43,7 +42,7 @@ const spotifyApi = new SpotifyWebApi({
 
     // Log Spotify credentials status
     console.log('Checking Spotify credentials:', {
-      hasClientId:'982fe0781e144e65a57ce7506d00b0e1' ,
+      hasClientId: !!process.env.SPOTIFY_CLIENT_ID, 
       hasClientSecret: !!process.env.SPOTIFY_CLIENT_SECRET
     });
 

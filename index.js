@@ -98,7 +98,7 @@ async function initialiseApp() {
     });
 
     // Dashboard route
-    app.get('/dashboard', requireLogin, async (req, res) => {
+    app.get('/usr/745/dashboard', requireLogin, async (req, res) => {
       try {
         const [metricsRow] = await db.query(`
           SELECT 
@@ -277,7 +277,7 @@ async function initialiseApp() {
     });
 
     // Search route
-    app.get('/search', requireLogin, async (req, res) => {
+    app.get('/usr/745/search', requireLogin, async (req, res) => {
       const searchQuery = req.query.q || '';
 
       try {

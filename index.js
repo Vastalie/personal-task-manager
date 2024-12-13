@@ -204,7 +204,7 @@ const spotifyApi = new SpotifyWebApi({
     // New task routes
     app.get('/tasks/new', (req, res) => {
       if (!req.session || !req.session.user) {
-        return res.redirect('/usr/745/login');
+        return res.redirect('/login');
       }
       res.render('new-task');
     });

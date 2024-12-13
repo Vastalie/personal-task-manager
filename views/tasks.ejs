@@ -31,13 +31,13 @@
                 <strong>Due Date:</strong> <%= dueDate.toLocaleDateString() %> [<%= statusText %>]
 
                 <% if (user) { %>
-                    <form action="/usr/745/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
+                    <form action="/tasks/<%= task.id %>/complete" method="POST" style="display:inline;">
                         <button type="submit">Mark as Completed</button>
                     </form>
-                    <form action="/usr/745/tasks/<%= task.id %>/pending" method="POST" style="display:inline;">
+                    <form action="/tasks/<%= task.id %>/pending" method="POST" style="display:inline;">
                         <button type="submit">Mark as Pending</button>
                     </form>
-                    <form action="/usr/745/tasks/<%= task.id %>/delete" method="POST" style="display:inline;">
+                    <form action="/tasks/<%= task.id %>/delete" method="POST" style="display:inline;">
                         <button type="submit">Delete</button>
                     </form>
                 <% } %>

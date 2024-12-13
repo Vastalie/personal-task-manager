@@ -12,7 +12,6 @@ const { encrypt, decrypt } = require('./utils/crypto');
 const { body, validationResult } = require('express-validator');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-const baseUrl = '/usr/745';
 const app = express();
 
 
@@ -93,7 +92,7 @@ const spotifyApi = new SpotifyWebApi({
     // Middleware to check if user is logged in
     function requireLogin(req, res, next) {
       if (!req.session.user) {
-        return res.redirect('/usr/745/login');
+        return res.redirect('/login');
       }
       next();
     }
@@ -110,7 +109,7 @@ const spotifyApi = new SpotifyWebApi({
     });
 
     // Spotify route
-    app.get('/usr/745/spotify', async (req, res) => {
+    app.get('/spotify', async (req, res) => {
       try {
         const playlistData = await spotifyApi.getPlaylist('4mIRypXv49j37pEJNuaZ46');
         res.render('spotify', { playlist: playlistData.body });
@@ -210,7 +209,7 @@ const spotifyApi = new SpotifyWebApi({
       res.render('new-task');
     });
 
-    app.get('/usr/745/tasks', async (req, res) => {
+    app.get('/tasks', async (req, res) => {
       try {
         const [tasks] = await db.query(
           'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
@@ -240,7 +239,7 @@ const spotifyApi = new SpotifyWebApi({
     });
 
     // Add new task
-    app.post('/usr/745/tasks/new', requireLogin, [
+    app.post('/tasks/new', requireLogin, [
       body('title').notEmpty().withMessage('Task title is required'),
       body('description').notEmpty().withMessage('Task description is required'),
       body('due_date').optional().isDate().withMessage('Invalid date format'),
@@ -265,7 +264,7 @@ const spotifyApi = new SpotifyWebApi({
           [title, encryptedData, iv, due_date || null, priority || 'Low', user_id]
         );
 
-        res.redirect('/usr/745/tasks');
+        res.redirect('/tasks');
       } catch (err) {
         console.error('Error adding task:', err);
         res.status(500).send('Error adding task');
@@ -273,33 +272,33 @@ const spotifyApi = new SpotifyWebApi({
     });
 
     // Task status routes
-    app.post('/usr/745/tasks/:id/complete', requireLogin, async (req, res) => {
+    app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
       try {
         const { id } = req.params;
         await db.query('UPDATE tasks SET completed = 1 WHERE id = ?', [id]);
-        res.redirect('/usr/745/tasks');
+        res.redirect('/tasks');
       } catch (err) {
         console.error('Error marking task as completed:', err);
         res.status(500).send('Internal Server Error');
       }
     });
 
-    app.post('/usr/745/tasks/:id/pending', requireLogin, async (req, res) => {
+    app.post('/tasks/:id/pending', requireLogin, async (req, res) => {
       try {
         const { id } = req.params;
         await db.query('UPDATE tasks SET completed = 0 WHERE id = ?', [id]);
-        res.redirect('/usr/745/tasks');
+        res.redirect('/tasks');
       } catch (err) {
         console.error('Error marking task as pending:', err);
         res.status(500).send('Error marking task as pending');
       }
     });
 
-    app.post('/usr/745/tasks/:id/delete', requireLogin, async (req, res) => {
+    app.post('/tasks/:id/delete', requireLogin, async (req, res) => {
       try {
         const { id } = req.params;
         await db.query('DELETE FROM tasks WHERE id = ?', [id]);
-        res.redirect('/usr/745/tasks');
+        res.redirect('/tasks');
       } catch (err) {
         console.error('Error deleting task:', err);
         res.status(500).send('Error deleting task');
@@ -346,7 +345,7 @@ const spotifyApi = new SpotifyWebApi({
       res.render('register', { errorMessage: null, registrationSuccess: false });
     });
 
-    app.post('/usr/745/register', [
+    app.post('/register', [
       body('username').notEmpty().withMessage('Username is required'),
       body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
       body('email').isEmail().withMessage('Invalid email address'),
@@ -381,7 +380,7 @@ const spotifyApi = new SpotifyWebApi({
       res.render('login');
     });
 
-    app.post('/usr/745/login', [
+    app.post('/login', [
       body('username').notEmpty().withMessage('Username is required'),
       body('password').notEmpty().withMessage('Password is required'),
     ], async (req, res) => {
@@ -413,7 +412,7 @@ const spotifyApi = new SpotifyWebApi({
           console.error('Error during logout:', err);
           return res.status(500).send('Error during logout');
         }
-        res.redirect('/usr/745/');
+        res.redirect('/');
       });
     });
 

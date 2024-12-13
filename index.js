@@ -396,7 +396,7 @@ const spotifyApi = new SpotifyWebApi({
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/usr/745/');
+          res.redirect('/');
         } else {
           res.send('Invalid username or password');
         }

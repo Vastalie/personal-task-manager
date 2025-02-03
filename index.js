@@ -379,22 +379,14 @@ const spotifyApi = new SpotifyWebApi({
       res.render('/login');
     });
 
-    app.post('/login', [
-      body('username').notEmpty().withMessage('Username is required'),
-      body('password').notEmpty().withMessage('Password is required'),
-    ], async (req, res) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).send(errors.array().map(err => err.msg).join(', '));
-      }
-
+    app.post('/login', async (req, res) => {
       const { username, password } = req.body;
-
+  
       try {
         const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
           req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/');
+          res.redirect('/tasks');
         } else {
           res.send('Invalid username or password');
         }
@@ -403,6 +395,7 @@ const spotifyApi = new SpotifyWebApi({
         res.status(500).send('Server error during login');
       }
     });
+  
 
     // Logout route
     app.get('/logout', (req, res) => {

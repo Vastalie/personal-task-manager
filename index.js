@@ -374,27 +374,27 @@ const spotifyApi = new SpotifyWebApi({
       }
     });
 
-    // Login routes
-    app.get('/login', (req, res) => {
-      res.render('login');
-    });
+    // login route
+app.get('/login', (req, res) => {
+  res.render('login');
+});
 
-    app.post('/login', async (req, res) => {
-      const { username, password } = req.body;
-  
-      try {
-        const [results] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
-        if (results.length > 0 && bcrypt.compareSync(password, results[0].password)) {
-          req.session.user = { id: results[0].id, username: results[0].username };
-          res.redirect('/tasks');
-        } else {
-          res.send('Invalid username or password');
-        }
-      } catch (err) {
-        console.error('Error during login:', err);
-        res.status(500).send('Server error during login');
-      }
-    });
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const [rows] = await db.query('SELECT * FROM users WHERE username=?', [username]);
+    if (rows.length > 0 && bcrypt.compareSync(password, rows[0].password)) {
+      req.session.user = { id: rows[0].id, username: rows[0].username };
+      res.redirect('/tasks');
+    } else {
+      res.send('Invalid username or password');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error during login');
+  }
+});
   
 
     // Logout route

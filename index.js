@@ -375,7 +375,7 @@ const spotifyApi = new SpotifyWebApi({
     });
 
 // login route
-app.post('/login', [
+app.post('login', [
   body('username').notEmpty().withMessage('Username is required'),
   body('password').notEmpty().withMessage('Password is required'),
 ], async (req, res) => {

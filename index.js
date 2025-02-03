@@ -292,7 +292,7 @@ app.get('/tasks/new', requireLogin, (req, res) => {
   app.get('/login', (req, res) => {
     res.render('login');
   });
-
+  
   app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 

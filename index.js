@@ -376,7 +376,7 @@ const spotifyApi = new SpotifyWebApi({
 
     // Login routes
     app.get('/login', (req, res) => {
-      res.render('/login');
+      res.render('login');
     });
 
     app.post('/login', async (req, res) => {

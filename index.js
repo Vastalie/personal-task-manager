@@ -208,35 +208,6 @@ const spotifyApi = new SpotifyWebApi({
       res.render('new-task');
     });
 
-    app.get('/tasks', async (req, res) => {
-      try {
-        const [tasks] = await db.query(
-          'SELECT id, title, encrypted_description, iv, due_date, completed, priority FROM tasks'
-        );
-
-        const formattedTasks = tasks.map((task) => {
-          if (req.session && req.session.user) {
-            return {
-              ...task,
-              decrypted_description: decrypt(task.encrypted_description, task.iv),
-              status: task.completed ? 'Completed' : 'Pending',
-            };
-          }
-          return {
-            ...task,
-            decrypted_description: null,
-            encrypted_description: task.encrypted_description,
-            status: task.completed ? 'Completed' : 'Pending',
-          };
-        });
-
-        res.render('tasks', { user: req.session.user, tasks: formattedTasks });
-      } catch (err) {
-        console.error('Error loading tasks:', err);
-        res.status(500).send('Internal Server Error');
-      }
-    });
-
     // Add new task
     app.post('/tasks/new', requireLogin, [
       body('title').notEmpty().withMessage('Task title is required'),

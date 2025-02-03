@@ -375,7 +375,12 @@ const spotifyApi = new SpotifyWebApi({
     });
 
 // login route
-app.get('/login', [
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+// POST /login: process the login submission with validation
+app.post('/login', [
   body('username').notEmpty().withMessage('Username is required'),
   body('password').notEmpty().withMessage('Password is required'),
 ], async (req, res) => {
@@ -399,6 +404,7 @@ app.get('/login', [
     res.status(500).send('Server error during login');
   }
 });
+
 
     // Logout route
     app.get('/logout', (req, res) => {

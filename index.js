@@ -22,7 +22,6 @@ async function initialiseApp() {
     const db = await mysql.createConnection({
       host: 'localhost',
       user: 'admin',
-    
       password: 'Shaina071199',
       database: 'personal_task_manager',
     });
@@ -377,7 +376,7 @@ const spotifyApi = new SpotifyWebApi({
 
     // Login routes
     app.get('/login', (req, res) => {
-      res.render('login');
+      res.render('/login');
     });
 
     app.post('/login', [

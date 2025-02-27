@@ -58,6 +58,11 @@ const PORT = 8000;
     next();
   }
 
+  res.render('index', {
+    taskManagerData: { appName: 'Task Manager' },
+    playlist: { id: '12345' }
+  });  
+
   // Root route (Task Manager page)
   app.get('/', (req, res) => {
     res.render('index', { user: req.session.user });

@@ -56,16 +56,15 @@ const PORT = 8000;
       return res.redirect('/login');
     }
     next();
-  }
-
-  res.render('index', {
-    taskManagerData: { appName: 'Task Manager' },
-    playlist: { id: '12345' }
-  });  
+  } 
 
   // Root route (Task Manager page)
   app.get('/', (req, res) => {
-    res.render('index', { user: req.session.user });
+    res.render('index', { 
+    user: req.session.user,
+    taskManagerData: { appName: 'Task Manager' },
+    playlist: { id: '12345' }
+    }); 
   });
 
 app.get('/about', (req, res) => {

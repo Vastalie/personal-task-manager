@@ -9,6 +9,8 @@ const { encrypt, decrypt } = require('./utils/crypto');
 const app = express();
 const PORT = 8000;
 
+const axios = require('axios');
+
 (async () => {
   // Create the database connection
   const db = await mysql.createConnection({
@@ -66,6 +68,39 @@ const PORT = 8000;
     playlist: { id: '12345' }
     }); 
   });
+  
+app.get('/spotify-playlist', async (req, res) => {
+  try {
+    // Get an access token (client credentials flow)
+    const tokenRes = await axios.post(
+      'https://accounts.spotify.com/api/token',
+      new URLSearchParams({
+        grant_type: 'client_credentials'
+      }),
+      {
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64'),
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+    const accessToken = tokenRes.data.access_token;
+
+    // Fetch the playlist data
+    const playlistId = 'YOUR_SPOTIFY_PLAYLIST_ID';
+    const playlistRes = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+
+    const playlist = playlistRes.data;
+    res.render('spotify-playlist', { playlist });
+  } catch (err) {
+    console.error(err);
+    res.render('spotify-playlist', { playlist: null });
+  }
+});
 
 app.get('/about', (req, res) => {
   res.render('about');

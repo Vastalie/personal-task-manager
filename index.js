@@ -16,7 +16,7 @@ const axios = require('axios');
   const db = await mysql.createConnection({
     host: 'localhost',
     user: 'admin',
-    password: 'Shaina071199', // Replace with your actual password
+    password: 'yourpassword', // Replace with your actual password
     database: 'personal_task_manager',
   });
 

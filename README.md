@@ -1,6 +1,6 @@
 # Personal Task Manager
 
-A task management application built with Node.js, Express, and MySQL.  
+A task management application built with Node.js, Express, and MySQL.   
 This project provides a backend-driven system for creating, updating, retrieving, and deleting tasks, using structured API routes and a relational database.
 
 ## Overview

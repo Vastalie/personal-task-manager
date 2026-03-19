@@ -106,7 +106,6 @@ host: 'localhost',
 user: 'root',
 password: 'yourpassword',
 database: 'your_database_name'
-Warning: No services available to control with `brew services`
 
 5. Start the application
 npm start
